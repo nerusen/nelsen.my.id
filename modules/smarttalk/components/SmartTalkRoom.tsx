@@ -179,10 +179,12 @@ export const SmartTalkRoom = () => {
   }, [thinkingMessageId, notif]);
 
   useEffect(() => {
-    if (data) {
+    if (data && messages.length === 0) {
+      // Only set messages from server data if we don't have any local messages yet
+      // This prevents overwriting optimistic updates
       setMessages(data);
     }
-  }, [data]);
+  }, [data, messages.length]);
 
   // Debug logging
   useEffect(() => {
