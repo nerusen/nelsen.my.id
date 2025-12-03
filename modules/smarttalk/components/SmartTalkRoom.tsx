@@ -203,13 +203,16 @@ export const SmartTalkRoom = () => {
     console.log("Smart Talk loading:", isLoading);
   }, [data, error, isLoading]);
 
-  // Simplified and reliable real-time subscription
+  // Enhanced real-time subscription for reliable message updates
   useEffect(() => {
     if (!session?.user?.email) return;
 
-    console.log("🔄 Setting up real-time subscription for user:", session?.user?.email);
+    console.log("🔄 Setting up enhanced real-time subscription for user:", session?.user?.email);
 
     let channel: any = null;
+    let reconnectTimeout: NodeJS.Timeout | null = null;
+    let reconnectAttempts = 0;
+    const maxReconnectAttempts = 5;
 
     const setupSubscription = () => {
       const channelName = `smart-talk-${session?.user?.email}-${Date.now()}`;
@@ -229,6 +232,7 @@ export const SmartTalkRoom = () => {
             console.log("📨 Real-time INSERT received:", {
               id: payload.new.id,
               is_ai: payload.new.is_ai,
+              is_thinking: payload.new.is_thinking,
               user_email: payload.new.user_email,
               message: payload.new.message?.substring(0, 50) + "...",
               thinkingMessageId: thinkingMessageId
@@ -242,32 +246,31 @@ export const SmartTalkRoom = () => {
               return;
             }
 
-            // If this is AI message and we have thinking message, replace it
-            if (newMessage.is_ai && thinkingMessageId) {
-              console.log("🔄 Replacing thinking message with AI response");
-              setMessages((prev: MessageProps[]) => prev.map((msg: MessageProps) =>
-                msg.id === thinkingMessageId
-                  ? { ...newMessage, is_thinking: false }
-                  : msg
-              ));
-              setThinkingMessageId(null);
-              console.log("✅ AI response displayed via real-time");
-              return;
-            }
+            setMessages((prevMessages) => {
+              // Check if we already have this message (to avoid duplicates)
+              const exists = prevMessages.some(msg => msg.id === newMessage.id);
+              if (exists) {
+                console.log("📝 Message already exists in UI, skipping duplicate");
+                return prevMessages;
+              }
 
-            // Add non-AI messages normally (including user messages that were inserted)
-            if (!newMessage.is_ai) {
-              setMessages((prev: MessageProps[]) => {
-                // Check if we already have this message (to avoid duplicates)
-                const exists = prev.some(msg => msg.id === newMessage.id);
-                if (exists) {
-                  console.log("📝 Message already exists in UI, skipping duplicate");
-                  return prev;
-                }
-                console.log("📝 Adding new user message from real-time:", newMessage.id);
-                return [...prev, newMessage];
-              });
-            }
+              // If this is AI message and we have thinking message, replace it
+              if (newMessage.is_ai && thinkingMessageId) {
+                console.log("🔄 Replacing thinking message with AI response");
+                const updatedMessages = prevMessages.map((msg: MessageProps) =>
+                  msg.id === thinkingMessageId
+                    ? { ...newMessage, is_thinking: false }
+                    : msg
+                );
+                setThinkingMessageId(null);
+                console.log("✅ AI response displayed via real-time");
+                return updatedMessages;
+              }
+
+              // Add new message (user or AI) to the end
+              console.log("📝 Adding new message from real-time:", newMessage.id, "is_ai:", newMessage.is_ai);
+              return [...prevMessages, newMessage];
+            });
           }
         )
         .subscribe((status: string, err: any) => {
@@ -275,8 +278,25 @@ export const SmartTalkRoom = () => {
 
           if (status === 'SUBSCRIBED') {
             console.log('✅ Successfully subscribed to real-time');
+            reconnectAttempts = 0; // Reset reconnect attempts on success
           } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
-            console.error('❌ Subscription failed');
+            console.error('❌ Subscription failed, attempting to reconnect...');
+
+            // Attempt to reconnect with exponential backoff
+            if (reconnectAttempts < maxReconnectAttempts) {
+              reconnectAttempts++;
+              const delay = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000); // Max 30 seconds
+
+              reconnectTimeout = setTimeout(() => {
+                if (channel) {
+                  supabase.removeChannel(channel);
+                  channel = null;
+                }
+                setupSubscription();
+              }, delay);
+            } else {
+              console.error('❌ Max reconnection attempts reached');
+            }
           }
         });
     };
@@ -288,8 +308,11 @@ export const SmartTalkRoom = () => {
       if (channel) {
         supabase.removeChannel(channel);
       }
+      if (reconnectTimeout) {
+        clearTimeout(reconnectTimeout);
+      }
     };
-  }, [supabase, session?.user?.email]);
+  }, [supabase, session?.user?.email, thinkingMessageId]);
 
   return (
     <div className="flex flex-col h-full">
