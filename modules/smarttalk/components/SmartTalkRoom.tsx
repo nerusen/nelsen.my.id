@@ -135,61 +135,21 @@ export const SmartTalkRoom = () => {
     }
   };
 
-
-
   const getAIResponse = async (userMessage: string, thinkingId: string, model: string) => {
     try {
       console.log("🤖 Sending AI response request for message:", userMessage.substring(0, 50) + "...");
-      console.log("📋 Request payload:", {
-        userMessage: userMessage.substring(0, 50) + "...",
-        email: session?.user?.email,
-        model,
-        thinkingId
-      });
 
       const response = await axios.post("/api/smart-talk", {
         userMessage,
         email: session?.user?.email,
         model,
-        thinkingId // Pass thinkingId for tracking
+        thinkingId
       });
 
-      console.log("✅ AI response request sent successfully, response:", response.data);
+      console.log("✅ AI response request sent successfully");
 
-      // Wait for real-time subscription to handle the response
-      // The real-time listener will replace the thinking message with the actual AI response
-
-      // Add a fallback: if no real-time response after 3 seconds, poll
-      setTimeout(async () => {
-        if (thinkingMessageId === thinkingId) { // Still thinking after 3 seconds
-          console.log("🔄 Fallback: Polling for AI response after 3 seconds...");
-          try {
-            const pollResponse = await fetch(`/api/smart-talk?email=${session?.user?.email}`);
-            const data = await pollResponse.json();
-
-            // Find the most recent AI message (within last 60 seconds)
-            const aiResponse = data
-              .filter((msg: MessageProps) => msg.is_ai && new Date(msg.created_at) > new Date(Date.now() - 60000))
-              .sort((a: MessageProps, b: MessageProps) =>
-                new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-              )[0];
-
-            if (aiResponse && thinkingMessageId === thinkingId) {
-              console.log("🎯 Found AI response via fallback polling, replacing thinking message");
-              console.log("📄 AI Response content:", aiResponse.message?.substring(0, 100) + "...");
-              setMessages(prev => prev.map(msg =>
-                msg.id === thinkingId ? { ...aiResponse, is_thinking: false } : msg
-              ));
-              setThinkingMessageId(null);
-              console.log("✅ AI response displayed via early polling fallback");
-            } else {
-              console.log("❓ No recent AI response found in early polling");
-            }
-          } catch (error) {
-            console.error("❌ Early fallback polling error:", error);
-          }
-        }
-      }, 3000); // 3 seconds fallback (even faster)
+      // The real-time subscription will handle updating the UI when the AI response is inserted
+      // No need for additional polling since we have reliable real-time updates
 
     } catch (error) {
       console.error("❌ Error getting AI response:", error);
@@ -201,8 +161,6 @@ export const SmartTalkRoom = () => {
       setThinkingMessageId(null);
     }
   };
-
-
 
   // Add a timeout to remove thinking message if AI response takes too long
   useEffect(() => {
@@ -235,50 +193,14 @@ export const SmartTalkRoom = () => {
     console.log("Smart Talk loading:", isLoading);
   }, [data, error, isLoading]);
 
-  // Force refresh mechanism for AI responses - backend refresh without UI disruption
-  const forceRefreshMessages = async () => {
-    if (!session?.user?.email) return;
-
-    try {
-      console.log("🔄 Force refreshing messages from backend...");
-      const response = await fetch(`/api/smart-talk?email=${session?.user?.email}&t=${Date.now()}`);
-      const freshData = await response.json();
-
-      // Only update if we have new data and there's a thinking message
-      if (freshData && Array.isArray(freshData) && thinkingMessageId) {
-        const aiResponse = freshData
-          .filter((msg: MessageProps) => msg.is_ai && new Date(msg.created_at) > new Date(Date.now() - 120000)) // Last 2 minutes
-          .sort((a: MessageProps, b: MessageProps) =>
-            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-          )[0];
-
-        if (aiResponse) {
-          console.log("🎯 Force refresh found AI response, replacing thinking message");
-          setMessages((prevMessages: MessageProps[]) => prevMessages.map((msg: MessageProps) =>
-            msg.id === thinkingMessageId ? { ...aiResponse, is_thinking: false } : msg
-          ));
-          setThinkingMessageId(null);
-          console.log("✅ AI response displayed via force refresh");
-          return true; // Success
-        }
-      }
-      return false; // No update needed
-    } catch (error) {
-      console.error("❌ Force refresh error:", error);
-      return false;
-    }
-  };
-
-  // Enhanced real-time subscription with aggressive polling fallback
+  // Simplified and reliable real-time subscription
   useEffect(() => {
     if (!session?.user?.email) return;
 
-    console.log("🔄 Setting up enhanced real-time subscription for user:", session?.user?.email);
+    console.log("🔄 Setting up real-time subscription for user:", session?.user?.email);
 
     let channel: any = null;
     let pollInterval: NodeJS.Timeout | null = null;
-    let retryCount = 0;
-    const maxRetries = 3;
 
     const setupSubscription = () => {
       const channelName = `smart-talk-${session?.user?.email}-${Date.now()}`;
@@ -331,70 +253,58 @@ export const SmartTalkRoom = () => {
           }
         )
         .subscribe((status: string, err: any) => {
-          console.log("🔗 Subscription status:", status);
+          console.log("🔗 Subscription status:", status, err);
 
           if (status === 'SUBSCRIBED') {
             console.log('✅ Successfully subscribed to real-time');
-            retryCount = 0;
             // Stop polling when real-time works
             if (pollInterval) {
               clearInterval(pollInterval);
               pollInterval = null;
             }
           } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
-            console.error('❌ Subscription failed, starting aggressive polling');
-            // Start aggressive polling immediately
+            console.error('❌ Subscription failed, starting polling fallback');
+            // Start polling as fallback
             if (!pollInterval) {
               pollInterval = setInterval(async () => {
                 if (thinkingMessageId) {
                   try {
-                    console.log('🔍 Aggressive polling for AI response...');
+                    console.log('🔍 Polling for AI response...');
                     const response = await fetch(`/api/smart-talk?email=${session?.user?.email}&t=${Date.now()}`);
                     const data = await response.json();
 
-                    // Find the most recent AI message within last 2 minutes
-                    const aiMessages = data
-                      .filter((msg: MessageProps) => msg.is_ai)
-                      .sort((a: MessageProps, b: MessageProps) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+                    // Find AI messages that are newer than our current messages
+                    const currentMaxTime = Math.max(
+                      ...messages.map(msg => new Date(msg.created_at).getTime()),
+                      0
+                    );
 
-                    if (aiMessages.length > 0) {
-                      const latestAIMessage = aiMessages[0];
-                      const messageAge = Date.now() - new Date(latestAIMessage.created_at).getTime();
+                    const newAIMessages = data
+                      .filter((msg: MessageProps) =>
+                        msg.is_ai &&
+                        new Date(msg.created_at).getTime() > currentMaxTime &&
+                        !messages.some(existing => existing.id === msg.id)
+                      )
+                      .sort((a: MessageProps, b: MessageProps) =>
+                        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+                      );
 
-                      // Only use messages from last 2 minutes and not already in our messages
-                      if (messageAge < 120000) {
-                        const isAlreadyDisplayed = messages.some((msg: MessageProps) => msg.id === latestAIMessage.id);
-
-                        if (!isAlreadyDisplayed) {
-                          console.log('🎯 Found new AI response via polling, replacing thinking message');
-                          setMessages((prev: MessageProps[]) => prev.map((msg: MessageProps) =>
-                            msg.id === thinkingMessageId
-                              ? { ...latestAIMessage, is_thinking: false }
-                              : msg
-                          ));
-                          setThinkingMessageId(null);
-                          console.log('✅ AI response displayed via aggressive polling');
-                          return;
-                        }
-                      }
+                    if (newAIMessages.length > 0) {
+                      const latestAIMessage = newAIMessages[0];
+                      console.log('🎯 Found new AI response via polling, replacing thinking message');
+                      setMessages((prev: MessageProps[]) => prev.map((msg: MessageProps) =>
+                        msg.id === thinkingMessageId
+                          ? { ...latestAIMessage, is_thinking: false }
+                          : msg
+                      ));
+                      setThinkingMessageId(null);
+                      console.log('✅ AI response displayed via polling');
                     }
                   } catch (error) {
                     console.error('❌ Polling error:', error);
                   }
                 }
-              }, 1000); // Poll every 1 second - very aggressive
-            }
-
-            // Try to reconnect
-            if (retryCount < maxRetries) {
-              retryCount++;
-              setTimeout(() => {
-                if (channel) {
-                  supabase.removeChannel(channel);
-                  channel = null;
-                }
-                setupSubscription();
-              }, 5000 * retryCount);
+              }, 2000); // Poll every 2 seconds
             }
           }
         });
@@ -411,7 +321,7 @@ export const SmartTalkRoom = () => {
         clearInterval(pollInterval);
       }
     };
-  }, [supabase, session?.user?.email, thinkingMessageId, messages]);
+  }, [supabase, session?.user?.email, thinkingMessageId]);
 
   return (
     <div className="flex flex-col h-full">
