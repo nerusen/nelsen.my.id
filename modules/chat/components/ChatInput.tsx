@@ -115,7 +115,7 @@ const ChatInput = ({
                 <button
                   type="button"
                   onClick={() => removeMedia(index)}
-                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                  className="absolute top-1 right-1 bg-red-500 bg-opacity-80 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
                 >
                   <CloseIcon size={12} />
                 </button>
