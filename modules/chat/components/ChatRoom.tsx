@@ -45,7 +45,7 @@ export const ChatRoom = ({ isWidget = false }: { isWidget?: boolean }) => {
       id: messageId,
       name: session?.user?.name || '',
       email: session?.user?.email || '',
-      image: session?.user?.image,
+      image: session?.user?.image || undefined,
       message,
       media,
       is_reply: isReply.is_reply,
