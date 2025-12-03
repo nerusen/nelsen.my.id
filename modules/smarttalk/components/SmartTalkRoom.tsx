@@ -179,12 +179,20 @@ export const SmartTalkRoom = () => {
   }, [thinkingMessageId, notif]);
 
   useEffect(() => {
-    if (data && messages.length === 0) {
-      // Only set messages from server data if we don't have any local messages yet
-      // This prevents overwriting optimistic updates
-      setMessages(data);
+    if (data) {
+      // Merge server data with local messages to preserve optimistic updates
+      setMessages((currentMessages) => {
+        // Create a map of existing message IDs for quick lookup
+        const existingIds = new Set(currentMessages.map(msg => msg.id));
+
+        // Filter out server messages that we already have locally (to preserve optimistic updates)
+        const newServerMessages = data.filter((serverMsg: MessageProps) => !existingIds.has(serverMsg.id));
+
+        // Combine existing messages with new server messages
+        return [...currentMessages, ...newServerMessages];
+      });
     }
-  }, [data, messages.length]);
+  }, [data]);
 
   // Debug logging
   useEffect(() => {
@@ -202,7 +210,6 @@ export const SmartTalkRoom = () => {
     console.log("🔄 Setting up real-time subscription for user:", session?.user?.email);
 
     let channel: any = null;
-    let pollInterval: NodeJS.Timeout | null = null;
 
     const setupSubscription = () => {
       const channelName = `smart-talk-${session?.user?.email}-${Date.now()}`;
@@ -248,9 +255,18 @@ export const SmartTalkRoom = () => {
               return;
             }
 
-            // Add non-AI messages normally
+            // Add non-AI messages normally (including user messages that were inserted)
             if (!newMessage.is_ai) {
-              setMessages((prev: MessageProps[]) => [...prev, newMessage]);
+              setMessages((prev: MessageProps[]) => {
+                // Check if we already have this message (to avoid duplicates)
+                const exists = prev.some(msg => msg.id === newMessage.id);
+                if (exists) {
+                  console.log("📝 Message already exists in UI, skipping duplicate");
+                  return prev;
+                }
+                console.log("📝 Adding new user message from real-time:", newMessage.id);
+                return [...prev, newMessage];
+              });
             }
           }
         )
@@ -259,55 +275,8 @@ export const SmartTalkRoom = () => {
 
           if (status === 'SUBSCRIBED') {
             console.log('✅ Successfully subscribed to real-time');
-            // Stop polling when real-time works
-            if (pollInterval) {
-              clearInterval(pollInterval);
-              pollInterval = null;
-            }
           } else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT' || status === 'CLOSED') {
-            console.error('❌ Subscription failed, starting polling fallback');
-            // Start polling as fallback
-            if (!pollInterval) {
-              pollInterval = setInterval(async () => {
-                if (thinkingMessageId) {
-                  try {
-                    console.log('🔍 Polling for AI response...');
-                    const response = await fetch(`/api/smart-talk?email=${session?.user?.email}&t=${Date.now()}`);
-                    const data = await response.json();
-
-                    // Find AI messages that are newer than our current messages
-                    const currentMaxTime = Math.max(
-                      ...messages.map(msg => new Date(msg.created_at).getTime()),
-                      0
-                    );
-
-                    const newAIMessages = data
-                      .filter((msg: MessageProps) =>
-                        msg.is_ai &&
-                        new Date(msg.created_at).getTime() > currentMaxTime &&
-                        !messages.some(existing => existing.id === msg.id)
-                      )
-                      .sort((a: MessageProps, b: MessageProps) =>
-                        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-                      );
-
-                    if (newAIMessages.length > 0) {
-                      const latestAIMessage = newAIMessages[0];
-                      console.log('🎯 Found new AI response via polling, replacing thinking message');
-                      setMessages((prev: MessageProps[]) => prev.map((msg: MessageProps) =>
-                        msg.id === thinkingMessageId
-                          ? { ...latestAIMessage, is_thinking: false }
-                          : msg
-                      ));
-                      setThinkingMessageId(null);
-                      console.log('✅ AI response displayed via polling');
-                    }
-                  } catch (error) {
-                    console.error('❌ Polling error:', error);
-                  }
-                }
-              }, 2000); // Poll every 2 seconds
-            }
+            console.error('❌ Subscription failed');
           }
         });
     };
@@ -319,11 +288,8 @@ export const SmartTalkRoom = () => {
       if (channel) {
         supabase.removeChannel(channel);
       }
-      if (pollInterval) {
-        clearInterval(pollInterval);
-      }
     };
-  }, [supabase, session?.user?.email, thinkingMessageId]);
+  }, [supabase, session?.user?.email]);
 
   return (
     <div className="flex flex-col h-full">
