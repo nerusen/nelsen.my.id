@@ -55,6 +55,8 @@ export const ChatRoom = ({ isWidget = false }: { isWidget?: boolean }) => {
     };
     try {
       await axios.post("/api/chat", newMessageData);
+      // Immediately add the message with media to local state for real-time display
+      setMessages((prevMessages) => [...prevMessages, newMessageData]);
       notif("Successfully to send message");
 
       // Check if this is the user's first message
@@ -62,6 +64,9 @@ export const ChatRoom = ({ isWidget = false }: { isWidget?: boolean }) => {
       if (userMessages.length === 0) {
         setShowPopupFor(messageId);
       }
+
+      // Clear reply state after sending
+      setIsReply({ is_reply: false, name: "" });
     } catch (error) {
       console.error("Error:", error);
       notif("Failed to send message");
