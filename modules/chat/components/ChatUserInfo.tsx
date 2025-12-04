@@ -11,6 +11,7 @@ interface ChatUserInfoProps {
   };
   isDemo?: boolean;
   onDemoSignOut?: () => void;
+  isWidget?: boolean;
 }
 
 const ChatUserInfo = ({ user, isDemo = false, onDemoSignOut }: ChatUserInfoProps) => {

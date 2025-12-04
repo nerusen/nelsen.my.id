@@ -7,8 +7,6 @@ import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
 
-import ChatUserInfo from "./ChatUserInfo";
-
 import { ChatInputProps } from "@/common/types/chat";
 
 interface ChatInputPropsNew extends ChatInputProps {
@@ -166,7 +164,6 @@ const ChatInput = ({
           </button>
         </div>
       </form>
-      <ChatUserInfo isWidget={isWidget} />
     </>
   );
 };
