@@ -35,7 +35,7 @@ const ChatAuth = ({ isWidget = false, onDemoLogin }: ChatAuthProps) => {
   const demoT = useTranslations("ChatRoomPage.demo_account");
   const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
 
-  const handleDemoLogin = (data) => {
+  const handleDemoLogin = (data: { username: string; email: string; image: string | null }) => {
     onDemoLogin(data);
     setIsDemoModalOpen(false);
   };
