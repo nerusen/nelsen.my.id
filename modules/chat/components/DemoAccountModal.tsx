@@ -63,20 +63,33 @@ const DemoAccountModal = ({ isOpen, onClose, onSave }: DemoAccountModalProps) =>
               {t("profile_photo")}
             </label>
             <div className="flex items-center space-x-2">
-              <label className="flex items-center justify-center w-12 h-12 border-2 border-dashed border-neutral-300 dark:border-neutral-600 rounded-lg cursor-pointer hover:border-neutral-400 dark:hover:border-neutral-500">
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="hidden"
-                />
-                <ImageIcon size={20} className="text-neutral-500" />
-              </label>
-              <span className="text-sm text-neutral-600 dark:text-neutral-400">Image</span>
+              {image ? (
+                <>
+                  <img src={image} alt="Profile" className="w-12 h-12 rounded-full object-cover" />
+                  <label className="flex items-center justify-center w-12 h-12 border-2 border-dashed border-neutral-300 dark:border-neutral-600 rounded-lg cursor-pointer hover:border-neutral-400 dark:hover:border-neutral-500">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="hidden"
+                    />
+                  </label>
+                </>
+              ) : (
+                <>
+                  <label className="flex items-center justify-center w-12 h-12 border-2 border-dashed border-neutral-300 dark:border-neutral-600 rounded-lg cursor-pointer hover:border-neutral-400 dark:hover:border-neutral-500">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="hidden"
+                    />
+                    <ImageIcon size={20} className="text-neutral-500" />
+                  </label>
+                  <span className="text-sm text-neutral-600 dark:text-neutral-400">Image</span>
+                </>
+              )}
             </div>
-            {image && (
-              <img src={image} alt="Profile" className="mt-2 w-16 h-16 rounded-full object-cover" />
-            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">
