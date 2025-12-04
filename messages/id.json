@@ -152,7 +152,13 @@
       "email": "Email",
       "email_placeholder": "Masukkan email",
       "cancel": "Batal",
-      "save": "Simpan"
+      "save": "Simpan",
+      "edit": "Edit",
+      "change": "Ubah",
+      "crop": "Crop",
+      "rotate": "Putar",
+      "apply": "Terapkan",
+      "reset": "Reset"
     },
     "widget": {
       "title": "Ruang Obrolan",

@@ -152,7 +152,13 @@
       "username_placeholder": "Enter your username",
       "email_placeholder": "Enter your email",
       "cancel": "Cancel",
-      "save": "Save"
+      "save": "Save",
+      "edit": "Edit",
+      "change": "Change",
+      "crop": "Crop",
+      "rotate": "Rotate",
+      "apply": "Apply",
+      "reset": "Reset"
     },
     "widget": {
       "title": "Chat Room",
