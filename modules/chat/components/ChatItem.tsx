@@ -192,10 +192,10 @@ const ChatItem = ({
         >
           <motion.div
             className={clsx(
-              "rounded-xl px-4 relative overflow-visible max-w-xs",
+              "rounded-xl px-4 relative overflow-visible max-w-xs border",
               condition
-                ? "author-gradient-border"
-                : "bg-neutral-200 dark:bg-[#1E1E1E] dark:text-neutral-50",
+                ? "bg-neutral-300 dark:bg-neutral-600 dark:text-neutral-50 author-gradient-border"
+                : "bg-neutral-200 dark:bg-[#1E1E1E] dark:text-neutral-50 border-neutral-300 dark:border-neutral-600",
               isEditing && "blur-none",
             )}
             animate={{
@@ -267,7 +267,7 @@ const ChatItem = ({
                 </div>
                 {is_reply && (
                   <>
-                    <div className="bg-[#96DABB] dark:bg-[#031E0F] text-xs text-neutral-600 dark:text-neutral-400 px-2 py-1 rounded-md mb-1 -mx-3">
+                    <div className={clsx("text-xs text-neutral-600 dark:text-neutral-400 px-2 py-1 rounded-md mb-1 -mx-3", condition ? "bg-neutral-400 dark:bg-neutral-500" : "bg-[#96DABB] dark:bg-[#031E0F]")}>
                       membalas <span className="text-blue-500">@{reply_to}</span>
                     </div>
                     <div className="mt-1">
