@@ -23,6 +23,7 @@ export const ChatRoom = ({ isWidget = false }: { isWidget?: boolean }) => {
   const [messages, setMessages] = useState<MessageProps[]>([]);
   const [isReply, setIsReply] = useState({ is_reply: false, name: "" });
   const [showPopupFor, setShowPopupFor] = useState<string | null>(null);
+  const [demoUser, setDemoUser] = useState<{ username: string; email: string; image: string | null } | null>(null);
 
   const { data: session } = useSession();
 

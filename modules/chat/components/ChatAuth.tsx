@@ -25,7 +25,12 @@ const Providers = [
   },
 ];
 
-const ChatAuth = ({ isWidget = false, onDemoLogin }) => {
+interface ChatAuthProps {
+  isWidget?: boolean;
+  onDemoLogin: (data: { username: string; email: string; image: string | null }) => void;
+}
+
+const ChatAuth = ({ isWidget = false, onDemoLogin }: ChatAuthProps) => {
   const t = useTranslations("ChatRoomPage.sign_in");
   const demoT = useTranslations("ChatRoomPage.demo_account");
   const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
