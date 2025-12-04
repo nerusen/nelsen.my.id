@@ -144,6 +144,16 @@
       "signed_label": "Masuk sebagai",
       "sign_out_label": "Keluar"
     },
+    "demo_account": {
+      "title": "Akun Demo",
+      "profile_photo": "Foto Profil",
+      "username": "Nama Pengguna",
+      "username_placeholder": "Masukkan nama pengguna",
+      "email": "Email",
+      "email_placeholder": "Masukkan email",
+      "cancel": "Batal",
+      "save": "Simpan"
+    },
     "widget": {
       "title": "Ruang Obrolan",
       "tooltip_title": "Buka Ruang Obrolan",
