@@ -3,8 +3,10 @@ import { signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import { BsGithub as GithubIcon } from "react-icons/bs";
 import { FcGoogle as GoogleIcon } from "react-icons/fc";
+import { useState } from "react";
 
 import Button from "@/common/components/elements/Button";
+import DemoAccountModal from "./DemoAccountModal";
 
 const Providers = [
   {
