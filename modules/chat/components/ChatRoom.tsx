@@ -30,8 +30,12 @@ export const ChatRoom = ({ isWidget = false }: { isWidget?: boolean }) => {
 
   const notif = useNotif();
 
+  const handleDemoLogin = (data: { username: string; email: string; image: string | null }) => {
+    setDemoUser(data);
+  };
+
   const handleClickReply = (name: string) => {
-    if (!session?.user) return notif("Please sign in to reply");
+    if (!session?.user && !demoUser) return notif("Please sign in to reply");
     setIsReply({ is_reply: true, name });
   };
 
@@ -43,9 +47,9 @@ export const ChatRoom = ({ isWidget = false }: { isWidget?: boolean }) => {
     const messageId = uuidv4();
     const newMessageData: MessageProps = {
       id: messageId,
-      name: session?.user?.name || '',
-      email: session?.user?.email || '',
-      image: session?.user?.image || undefined,
+      name: session?.user?.name || demoUser?.username || '',
+      email: session?.user?.email || demoUser?.email || '',
+      image: session?.user?.image || demoUser?.image || undefined,
       message,
       media,
       is_reply: isReply.is_reply,
@@ -189,7 +193,7 @@ export const ChatRoom = ({ isWidget = false }: { isWidget?: boolean }) => {
           isWidget={isWidget}
         />
       ) : (
-        <ChatAuth isWidget={isWidget} />
+        <ChatAuth isWidget={isWidget} onDemoLogin={handleDemoLogin} />
       )}
     </>
   );
