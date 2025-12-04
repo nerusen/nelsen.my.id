@@ -185,7 +185,7 @@ export const ChatRoom = ({ isWidget = false }: { isWidget?: boolean }) => {
           showPopupFor={showPopupFor}
         />
       )}
-      {session ? (
+      {session || demoUser ? (
         <ChatInput
           onSendMessage={handleSendMessage}
           onCancelReply={handleCancelReply}
