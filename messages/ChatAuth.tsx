@@ -6,7 +6,7 @@ import { FcGoogle as GoogleIcon } from "react-icons/fc";
 import { useState } from "react";
 
 import Button from "@/common/components/elements/Button";
-import DemoAccountModal from "./DemoAccountModal";
+import DemoAccountModal from "./DemoAccountModal.tsx";
 
 const Providers = [
   {
