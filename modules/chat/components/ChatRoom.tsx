@@ -11,6 +11,7 @@ import ChatInput from "./ChatInput";
 import ChatList from "./ChatList";
 import ChatItemSkeleton from "./ChatItemSkeleton";
 import WelcomeNotification from "./WelcomeNotification";
+import ChatUserInfo from "./ChatUserInfo";
 
 import { MessageProps } from "@/common/types/chat";
 import { fetcher } from "@/services/fetcher";
@@ -33,6 +34,12 @@ export const ChatRoom = ({ isWidget = false }: { isWidget?: boolean }) => {
 
   const handleDemoLogin = (data: { username: string; email: string; image: string | null }) => {
     setDemoUser(data);
+    localStorage.setItem('demoUser', JSON.stringify(data));
+  };
+
+  const handleDemoSignOut = () => {
+    setDemoUser(null);
+    localStorage.removeItem('demoUser');
   };
 
   const handleClickReply = (name: string) => {
@@ -108,6 +115,20 @@ export const ChatRoom = ({ isWidget = false }: { isWidget?: boolean }) => {
   useEffect(() => {
     if (data) setMessages(data);
   }, [data]);
+
+  // Load demo user from localStorage on mount
+  useEffect(() => {
+    const savedDemoUser = localStorage.getItem('demoUser');
+    if (savedDemoUser) {
+      try {
+        const parsedUser = JSON.parse(savedDemoUser);
+        setDemoUser(parsedUser);
+      } catch (error) {
+        console.error('Error parsing saved demo user:', error);
+        localStorage.removeItem('demoUser');
+      }
+    }
+  }, []);
 
   // Debug logging
   useEffect(() => {
@@ -187,12 +208,23 @@ export const ChatRoom = ({ isWidget = false }: { isWidget?: boolean }) => {
         />
       )}
       {session || demoUser ? (
-        <ChatInput
-          onSendMessage={handleSendMessage}
-          onCancelReply={handleCancelReply}
-          replyName={isReply.name}
-          isWidget={isWidget}
-        />
+        <>
+          <ChatUserInfo
+            user={{
+              name: session?.user?.name || demoUser?.username,
+              email: session?.user?.email || demoUser?.email,
+              image: session?.user?.image || demoUser?.image || "/images/default-avatar.png"
+            }}
+            isDemo={!!demoUser}
+            onDemoSignOut={handleDemoSignOut}
+          />
+          <ChatInput
+            onSendMessage={handleSendMessage}
+            onCancelReply={handleCancelReply}
+            replyName={isReply.name}
+            isWidget={isWidget}
+          />
+        </>
       ) : (
         <ChatAuth isWidget={isWidget} onDemoLogin={handleDemoLogin} />
       )}

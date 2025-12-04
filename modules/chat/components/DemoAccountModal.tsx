@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { IoClose as CloseIcon, IoImage as ImageIcon } from "react-icons/io5";
+import { IoClose as CloseIcon, IoImage as ImageIcon, IoPencil as EditIcon, IoRefresh as ChangeIcon } from "react-icons/io5";
 import { useTranslations } from "next-intl";
 
 interface DemoAccountModalProps {

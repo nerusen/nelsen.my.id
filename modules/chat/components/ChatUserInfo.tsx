@@ -1,61 +1,59 @@
-import React from "react";
-import { signOut, useSession } from "next-auth/react";
+import { signOut } from "next-auth/react";
 import { useTranslations } from "next-intl";
-import { HiOutlineLogout as SignOutIcon } from "react-icons/hi";
-import { GiCoffeeCup } from "react-icons/gi";
-import cn from "@/common/libs/clsxm";
+import Image from "next/image";
+import { FiLogOut as SignOutIcon } from "react-icons/fi";
 
-const ChatUserInfo = ({ isWidget = false }: { isWidget?: boolean }) => {
+interface ChatUserInfoProps {
+  user: {
+    name?: string;
+    email?: string;
+    image?: string;
+  };
+  isDemo?: boolean;
+  onDemoSignOut?: () => void;
+}
+
+const ChatUserInfo = ({ user, isDemo = false, onDemoSignOut }: ChatUserInfoProps) => {
   const t = useTranslations("ChatRoomPage.sign_in");
 
-  const { data: session } = useSession();
+  const handleSignOut = () => {
+    if (isDemo && onDemoSignOut) {
+      onDemoSignOut();
+    } else {
+      signOut();
+    }
+  };
 
-  const userName = session?.user?.name ?? null;
-  const userEmail = session?.user?.email ?? null;
-
-  return session ? (
-    <div
-      className={cn(
-        "flex flex-col items-center justify-between pb-3 gap-4 px-4 text-sm md:flex-row",
-        isWidget && "text-xs",
-      )}
-    >
-      <div className="flex items-center gap-2 text-neutral-500">
-        {session.user?.image && (
-          <img
-            src={session.user.image}
-            alt={userName || "User"}
-            className="w-6 h-6 rounded-full"
+  return (
+    <div className="flex items-center justify-between border-t border-neutral-300 py-3 px-4 dark:border-neutral-900">
+      <div className="flex items-center space-x-3">
+        <div className="relative w-8 h-8 rounded-full overflow-hidden">
+          <Image
+            src={user.image || "/images/default-avatar.png"}
+            alt="Profile"
+            fill
+            className="object-cover"
           />
-        )}
-        <div className="flex flex-wrap gap-1">
-          <p>{t("signed_label")}</p>
-          <p className="font-medium">{userName}</p>
-          <p>({userEmail})</p>
+        </div>
+        <div className="flex flex-col">
+          <span className="text-sm font-medium text-neutral-900 dark:text-neutral-100">
+            {user.name}
+          </span>
+          <span className="text-xs text-neutral-500 dark:text-neutral-400">
+            {user.email}
+          </span>
         </div>
       </div>
-      {!isWidget && (
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => signOut()}
-            className="flex cursor-pointer items-center gap-1 rounded-md bg-red-600 px-3 py-1 font-medium text-red-50 transition duration-100 hover:bg-red-500 active:scale-90"
-          >
-            <SignOutIcon size={16} />
-            <span>{t("sign_out_label")}</span>
-          </button>
-          <a
-            href="https://buymeacoffee.com/nerusen"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex cursor-pointer items-center gap-1 rounded-md gold-shimmer px-3 py-1 font-medium transition duration-100 active:scale-90"
-          >
-            <GiCoffeeCup size={16} />
-            <span>BuyMeCoffee</span>
-          </a>
-        </div>
-      )}
+      <button
+        onClick={handleSignOut}
+        className="flex items-center space-x-1 px-3 py-1.5 text-sm bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
+        data-umami-event={isDemo ? "sign_out: Demo" : "sign_out"}
+      >
+        <SignOutIcon size={14} />
+        <span>{t("sign_out_label")}</span>
+      </button>
     </div>
-  ) : null;
+  );
 };
 
 export default ChatUserInfo;
