@@ -144,6 +144,16 @@
       "signed_label": "Signed in as",
       "sign_out_label": "Sign out"
     },
+    "demo_account": {
+      "title": "Demo Account",
+      "profile_photo": "Profile Photo",
+      "username": "Username",
+      "email": "Email",
+      "username_placeholder": "Enter your username",
+      "email_placeholder": "Enter your email",
+      "cancel": "Cancel",
+      "save": "Save"
+    },
     "widget": {
       "title": "Chat Room",
       "tooltip_title": "Open Chat Room",
