@@ -23,7 +23,7 @@ const ProfileHeader = ({ expandMenu, imageSize }: ProfileHeaderProps) => {
     >
       <div className="google-profile-border">
         <Image
-          src={"/images/satria-1.jpg"}
+          src={"/images/nelsen-1.png"}
           width={expandMenu ? 80 : imageSize * 0.9}
           height={expandMenu ? 80 : imageSize * 0.9}
           alt="n31sen.st"
