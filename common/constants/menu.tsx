@@ -6,10 +6,9 @@ import {
   BiBook as ContactIcon,
 } from "react-icons/bi";
 import { PiChatTeardropDotsBold as ChatRoomIcon } from "react-icons/pi";
-import { PiCertificate as AchievementIcon } from "react-icons/pi";
+import { PiCertificate as AchievementIcon, PiGameController as StrikeGameIcon } from "react-icons/pi";
 import { VscHubot as SmartChatIcon } from "react-icons/vsc";
 import { IoMdMusicalNote as MusicRoomIcon } from "react-icons/io";
-import { GiFire as StrikeGameIcon } from "react-icons/gi";
 
 import { MenuItemProps } from "../types/menu";
 
