@@ -11,4 +11,15 @@ export const EDUCATION: EducationProps[] = [
     end_year: 2026,
     link: "https://smkketintang.sch.id",
   },
+
+  {
+    school: "SMP KEMALA BHAYANGKARI 1 SURABAYA",
+    major: "Unknown",
+    logo: "/images/education/bhy.jpg",
+    location: "Surabaya, Indonesia 🇮🇩",
+    degree: "Students",
+    start_year: 2020,
+    end_year: 2023,
+    link: "https://smpbhayangkari1sby.sch.id/",
+  },
 ];
