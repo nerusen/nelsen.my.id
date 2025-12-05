@@ -2,7 +2,18 @@ import { EducationProps } from "../types/education";
 
 export const EDUCATION: EducationProps[] = [
   {
-    school: "SMKS KETINTANG SURABAYA",
+    school: "IDcamp Indosat Ooredoo Hutchison",
+    major: "Frontend Developer",
+    logo: "/images/education/idcamp.png",
+    location: "Surabaya, Indonesia 🇮🇩",
+    degree: "Students",
+    start_year: 2025,
+    end_year: 2026,
+    link: "https://idcamp.ioh.co.id/",
+  },
+  
+  {
+    school: "SMKS Ketintang Surabaya",
     major: "Desain Komunikasi Visual",
     logo: "/images/education/unja.png",
     location: "Surabaya, Indonesia 🇮🇩",
@@ -13,7 +24,7 @@ export const EDUCATION: EducationProps[] = [
   },
 
   {
-    school: "SMP KEMALA BHAYANGKARI 1 SURABAYA",
+    school: "SMP Kemala Bhayangkari 1 Surabaya",
     major: "Unknown",
     logo: "/images/education/bhy.png",
     location: "Surabaya, Indonesia 🇮🇩",
