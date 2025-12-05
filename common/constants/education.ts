@@ -15,7 +15,7 @@ export const EDUCATION: EducationProps[] = [
   {
     school: "SMP KEMALA BHAYANGKARI 1 SURABAYA",
     major: "Unknown",
-    logo: "/images/education/bhy.jpg",
+    logo: "/images/education/bhy.png",
     location: "Surabaya, Indonesia 🇮🇩",
     degree: "Students",
     start_year: 2020,
