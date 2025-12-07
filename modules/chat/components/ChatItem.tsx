@@ -155,13 +155,15 @@ const ChatItem = ({
         </motion.div>
       )}
       {image && (
-        <Image
-          src={image}
-          width={40}
-          height={40}
-          alt={name}
-          className="mt-1 rounded-full border dark:border-neutral-800"
-        />
+        <div className={condition ? "google-profile-border" : ""}>
+          <Image
+            src={image}
+            width={40}
+            height={40}
+            alt={name}
+            className="mt-1 rounded-full border dark:border-neutral-800"
+          />
+        </div>
       )}
 
       <div
