@@ -68,8 +68,8 @@
 .author-gradient-border::before {
   content: '';
   position: absolute;
-  height: calc(100% + 2px);
-  width: calc(100% + 2px);
+  height: calc(100% + 1px);
+  width: calc(100% + 1px);
   background-image: conic-gradient(from var(--angle), #1E1E1E00, #6b7280, #1E1E1E00, #1E1E1E00, #1E1E1E00);
   top: -1px;
   left: -1px;
