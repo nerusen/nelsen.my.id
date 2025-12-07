@@ -124,6 +124,38 @@
   background: #121212;
 }
 
+.chat-author-profile-border {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from -20deg,
+    #DB4437 0deg 90deg,
+    #4285F4 90deg 210deg,
+    #0F9D58 210deg 300deg,
+    #F4B400 300deg 360deg
+  );
+  padding: 2px;
+}
+
+.chat-author-profile-border::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  background: white;
+  border-radius: 50%;
+  z-index: 1;
+}
+
+.dark .chat-author-profile-border::before {
+  background: #121212;
+}
+
 .author-bubble-glow {
   position: relative;
 }
