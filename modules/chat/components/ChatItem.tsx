@@ -194,7 +194,7 @@ const ChatItem = ({
             className={clsx(
               "rounded-xl px-4 relative overflow-visible max-w-xs border",
               condition
-                ? "bg-neutral-200 dark:bg-[#1E1E1E] dark:text-neutral-50 border-[#329BFF]/80"
+                ? "bg-[#15192F] dark:text-neutral-50 border-[#329BFF]/80 author-bubble-glow"
                 : "bg-neutral-200 dark:bg-[#1E1E1E] dark:text-neutral-50 border-neutral-300 dark:border-neutral-600",
               isEditing && "blur-none",
             )}
@@ -267,7 +267,7 @@ const ChatItem = ({
                 </div>
                 {is_reply && (
                   <>
-                    <div className={clsx("text-xs text-neutral-600 dark:text-neutral-400 px-2 py-1 rounded-md mb-1 -mx-3", condition ? "bg-neutral-300 dark:bg-[#121212]" : "bg-neutral-300 dark:bg-[#121212]")}>
+                    <div className={clsx("text-xs text-neutral-600 dark:text-neutral-400 px-2 py-1 rounded-md mb-1 -mx-3", condition ? "bg-[#1A3273]" : "bg-neutral-300 dark:bg-[#121212]")}>
                       membalas <span className="text-blue-500">@{reply_to}</span>
                     </div>
                     <div className="mt-1">
