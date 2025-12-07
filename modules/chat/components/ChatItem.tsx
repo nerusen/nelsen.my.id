@@ -194,7 +194,7 @@ const ChatItem = ({
             className={clsx(
               "rounded-xl px-4 relative overflow-visible max-w-xs border",
               condition
-                ? "bg-neutral-200 dark:bg-[#1E1E1E] dark:text-neutral-50 border-neutral-300 dark:border-neutral-600"
+                ? "bg-neutral-200 dark:bg-[#1E1E1E] dark:text-neutral-50 border-[#329BFF]/80"
                 : "bg-neutral-200 dark:bg-[#1E1E1E] dark:text-neutral-50 border-neutral-300 dark:border-neutral-600",
               isEditing && "blur-none",
             )}
