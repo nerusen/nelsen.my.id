@@ -129,10 +129,10 @@
 .author-bubble-glow::before {
   content: '';
   position: absolute;
-  top: -1px;
+  top: -1.5px;
   left: -1px;
   right: -1px;
-  bottom: -1px;
+  bottom: -1.5px;
   background: conic-gradient(from var(--angle), transparent, #329BFF, transparent);
   border-radius: inherit;
   z-index: -1;
