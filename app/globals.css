@@ -121,3 +121,20 @@
 .dark .google-profile-border::before {
   background: #121212;
 }
+
+.author-bubble-glow {
+  position: relative;
+}
+
+.author-bubble-glow::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: conic-gradient(from var(--angle), transparent, #329BFF, transparent);
+  border-radius: inherit;
+  z-index: -1;
+  animation: spin 2s linear infinite;
+}
