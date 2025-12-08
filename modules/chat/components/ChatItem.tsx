@@ -11,6 +11,9 @@ import { BsPinAngleFill as PinIcon } from "react-icons/bs";
 import { MdEdit as EditIcon } from "react-icons/md";
 import { IoInformationCircle as InfoIcon } from "react-icons/io5";
 import { IoClose as CloseIcon } from "react-icons/io5";
+import { FiMusic as MusicIcon } from "react-icons/fi";
+import { FiFileText as FileIcon } from "react-icons/fi";
+import { FiDownload as DownloadIcon } from "react-icons/fi";
 
 import ChatTime from "./ChatTime";
 import MessageRenderer from "./MessageRenderer";
@@ -20,6 +23,7 @@ import Tooltip from "@/common/components/elements/Tooltip";
 import { MessageProps } from "@/common/types/chat";
 
 interface ChatItemProps extends MessageProps {
+  attachment?: Attachment | null;
   isWidget?: boolean;
   onDelete: (id: string) => void;
   onReply: (name: string) => void;
@@ -39,6 +43,7 @@ const ChatItem = ({
   image,
   message,
   media,
+  attachment,
   created_at,
   reply_to,
   is_reply,
