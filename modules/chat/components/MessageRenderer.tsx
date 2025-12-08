@@ -16,6 +16,70 @@ interface MarkdownElement {
   language?: string;
 }
 
+const parseInlineMarkdown = (text: string): MarkdownElement[] => {
+  const parts: MarkdownElement[] = [];
+  let lastIndex = 0;
+
+  // Regex patterns for inline elements
+  const patterns = [
+    { regex: /\*\*(.*?)\*\*/g, type: 'bold' },
+    { regex: /__(.*?)__/g, type: 'underline' },
+    { regex: /~~(.*?)~~/g, type: 'strikethrough' },
+    { regex: /\*(.*?)\*/g, type: 'italic' },
+    { regex: /_(.*?)_/g, type: 'italic' },
+    { regex: /`([^`]+)`/g, type: 'inlinecode' },
+    { regex: /\[([^\]]+)\]\(([^)]+)\)/g, type: 'maskedlink' },
+    { regex: /-#\s*(.+)/g, type: 'subtext' },
+    { regex: /^>\s*(.+)/gm, type: 'blockquote' },
+    { regex: /^>>>\s*(.+)/gm, type: 'multilineblockquote' },
+    { regex: /^#{1,3}\s*(.+)/gm, type: 'header' },
+    { regex: /^\*\s*(.+)/gm, type: 'listitem' },
+    { regex: /^-\s*(.+)/gm, type: 'sublistitem' },
+    { regex: /(https?:\/\/[^\s]+)/g, type: 'url' },
+  ];
+
+  // Find all matches
+  const matches: MarkdownElement[] = [];
+  patterns.forEach(({ regex, type }) => {
+    let match;
+    while ((match = regex.exec(text)) !== null) {
+      matches.push({
+        index: match.index,
+        length: match[0].length,
+        type,
+        content: match[1] || match[0],
+        fullMatch: match[0],
+        url: match[2] || null,
+      });
+    }
+  });
+
+  // Sort matches by index
+  matches.sort((a, b) => (a.index || 0) - (b.index || 0));
+
+  // Process matches
+  matches.forEach((match) => {
+    if ((match.index || 0) > lastIndex) {
+      parts.push({
+        type: 'text',
+        content: text.slice(lastIndex, match.index),
+      });
+    }
+    parts.push(match);
+    lastIndex = (match.index || 0) + (match.length || 0);
+  });
+
+  // Add remaining text
+  if (lastIndex < text.length) {
+    parts.push({
+      type: 'text',
+      content: text.slice(lastIndex),
+    });
+  }
+
+  return parts;
+};
+
 const MessageRenderer = ({ message, className }: MessageRendererProps) => {
   const parseMarkdown = useMemo(() => {
     const elements: MarkdownElement[] = [];
@@ -42,70 +106,6 @@ const MessageRenderer = ({ message, className }: MessageRendererProps) => {
 
     return elements;
   }, [message]);
-
-  const parseInlineMarkdown = (text: string): MarkdownElement[] => {
-    const parts: MarkdownElement[] = [];
-    let lastIndex = 0;
-
-    // Regex patterns for inline elements
-    const patterns = [
-      { regex: /\*\*(.*?)\*\*/g, type: 'bold' },
-      { regex: /__(.*?)__/g, type: 'underline' },
-      { regex: /~~(.*?)~~/g, type: 'strikethrough' },
-      { regex: /\*(.*?)\*/g, type: 'italic' },
-      { regex: /_(.*?)_/g, type: 'italic' },
-      { regex: /`([^`]+)`/g, type: 'inlinecode' },
-      { regex: /\[([^\]]+)\]\(([^)]+)\)/g, type: 'maskedlink' },
-      { regex: /-#\s*(.+)/g, type: 'subtext' },
-      { regex: /^>\s*(.+)/gm, type: 'blockquote' },
-      { regex: /^>>>\s*(.+)/gm, type: 'multilineblockquote' },
-      { regex: /^#{1,3}\s*(.+)/gm, type: 'header' },
-      { regex: /^\*\s*(.+)/gm, type: 'listitem' },
-      { regex: /^-\s*(.+)/gm, type: 'sublistitem' },
-      { regex: /(https?:\/\/[^\s]+)/g, type: 'url' },
-    ];
-
-    // Find all matches
-    const matches: MarkdownElement[] = [];
-    patterns.forEach(({ regex, type }) => {
-      let match;
-      while ((match = regex.exec(text)) !== null) {
-        matches.push({
-          index: match.index,
-          length: match[0].length,
-          type,
-          content: match[1] || match[0],
-          fullMatch: match[0],
-          url: match[2] || null,
-        });
-      }
-    });
-
-    // Sort matches by index
-    matches.sort((a, b) => (a.index || 0) - (b.index || 0));
-
-    // Process matches
-    matches.forEach((match) => {
-      if ((match.index || 0) > lastIndex) {
-        parts.push({
-          type: 'text',
-          content: text.slice(lastIndex, match.index),
-        });
-      }
-      parts.push(match);
-      lastIndex = (match.index || 0) + (match.length || 0);
-    });
-
-    // Add remaining text
-    if (lastIndex < text.length) {
-      parts.push({
-        type: 'text',
-        content: text.slice(lastIndex),
-      });
-    }
-
-    return parts;
-  };
 
   const renderElement = (element: MarkdownElement, index: number): React.ReactElement => {
     switch (element.type) {
