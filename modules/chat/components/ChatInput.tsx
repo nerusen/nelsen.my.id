@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { ChangeEvent, FormEvent, useRef, useState } from "react";
+import { ChangeEvent, FormEvent, useRef, useState, useEffect } from "react";
 import { FiSend as SendIcon } from "react-icons/fi";
 import { MdPhotoLibrary as PhotoIcon } from "react-icons/md";
 import { IoClose as CloseIcon } from "react-icons/io5";
@@ -26,7 +26,7 @@ const ChatInput = ({
   const [isSending, setIsSending] = useState(false);
   const [media, setMedia] = useState<string[]>([]);
 
-  const inputRef = useRef<HTMLInputElement | null>(null);
+  const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const t = useTranslations("ChatRoomPage");
@@ -78,9 +78,31 @@ const ChatInput = ({
     setMedia((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setMessage(e.target.value);
   };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      // Insert newline
+      const textarea = e.currentTarget;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const value = textarea.value;
+      textarea.value = value.substring(0, start) + '\n' + value.substring(end);
+      textarea.selectionStart = textarea.selectionEnd = start + 1;
+      setMessage(textarea.value);
+    }
+  };
+
+  // Auto-resize textarea
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.style.height = 'auto';
+      inputRef.current.style.height = inputRef.current.scrollHeight + 'px';
+    }
+  }, [message]);
 
   return (
     <>
