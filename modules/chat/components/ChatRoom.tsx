@@ -60,7 +60,6 @@ export const ChatRoom = ({ isWidget = false }: { isWidget?: boolean }) => {
       image: session?.user?.image || demoUser?.image || undefined,
       message,
       media: attachment ? [attachment.data] : undefined,
-      attachment,
       is_reply: isReply.is_reply,
       reply_to: isReply.name,
       is_show: true,
