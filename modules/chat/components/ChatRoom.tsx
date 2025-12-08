@@ -51,7 +51,7 @@ export const ChatRoom = ({ isWidget = false }: { isWidget?: boolean }) => {
     setIsReply({ is_reply: false, name: "" });
   };
 
-  const handleSendMessage = async (message: string, media?: string[]) => {
+  const handleSendMessage = async (message: string, attachment?: { type: 'image' | 'audio' | 'document'; data: string; name: string } | null) => {
     const messageId = uuidv4();
     const newMessageData: MessageProps = {
       id: messageId,
@@ -59,7 +59,8 @@ export const ChatRoom = ({ isWidget = false }: { isWidget?: boolean }) => {
       email: session?.user?.email || demoUser?.email || '',
       image: session?.user?.image || demoUser?.image || undefined,
       message,
-      media,
+      media: attachment ? [attachment.data] : undefined,
+      attachment,
       is_reply: isReply.is_reply,
       reply_to: isReply.name,
       is_show: true,
