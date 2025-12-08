@@ -22,6 +22,12 @@ import ImageModal from "./ImageModal";
 import Tooltip from "@/common/components/elements/Tooltip";
 import { MessageProps } from "@/common/types/chat";
 
+type Attachment = {
+  type: 'image' | 'audio' | 'document';
+  data: string;
+  name: string;
+};
+
 interface ChatItemProps extends MessageProps {
   attachment?: Attachment | null;
   isWidget?: boolean;
