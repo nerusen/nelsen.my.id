@@ -25,7 +25,6 @@ const parseInlineMarkdown = (text: string): MarkdownElement[] => {
     // Block elements (must be at line start)
     { regex: /^#{1,3}\s+(.+)$/gm, type: 'header' },
     { regex: /^>\s*(.+)$/gm, type: 'blockquote' },
-    { regex: /^>>>\s*(.+)$/gm, type: 'multilineblockquote' },
     { regex: /^\*\s+(.+)$/gm, type: 'listitem' },
     { regex: /^-\s+(.+)$/gm, type: 'sublistitem' },
     { regex: /^-#\s*(.+)$/gm, type: 'subtext' },
@@ -110,10 +109,31 @@ const MessageRenderer = ({ message, className }: MessageRendererProps) => {
     const elements: MarkdownElement[] = [];
     let remainingText = message;
 
-    // Process code blocks first (multiline)
+    // Process multiline block quotes first (>>>) - handle multiple consecutive lines
+    const multilineBlockquoteRegex = /^>>>(.*(?:\n(?!\n).*)*)/gm;
+    let multilineMatch;
+    while ((multilineMatch = multilineBlockquoteRegex.exec(message)) !== null) {
+      const beforeBlockquote = remainingText.slice(0, multilineMatch.index);
+      if (beforeBlockquote) {
+        elements.push(...parseInlineMarkdown(beforeBlockquote));
+      }
+      // Remove the >>> prefix from each line and join
+      const content = multilineMatch[0]
+        .split('\n')
+        .map(line => line.replace(/^>>>\s*/, ''))
+        .join('\n')
+        .trim();
+      elements.push({
+        type: 'multilineblockquote',
+        content: content,
+      });
+      remainingText = remainingText.slice(multilineMatch.index + multilineMatch[0].length);
+    }
+
+    // Process code blocks (multiline)
     const codeBlockRegex = /```(\w+)?\n?([\s\S]*?)```/g;
     let codeMatch;
-    while ((codeMatch = codeBlockRegex.exec(message)) !== null) {
+    while ((codeMatch = codeBlockRegex.exec(remainingText)) !== null) {
       const beforeCode = remainingText.slice(0, codeMatch.index);
       if (beforeCode) {
         elements.push(...parseInlineMarkdown(beforeCode));
@@ -125,6 +145,7 @@ const MessageRenderer = ({ message, className }: MessageRendererProps) => {
       });
       remainingText = remainingText.slice(codeMatch.index + codeMatch[0].length);
     }
+
     if (remainingText) {
       elements.push(...parseInlineMarkdown(remainingText));
     }
@@ -164,7 +185,7 @@ const MessageRenderer = ({ message, className }: MessageRendererProps) => {
       case 'blockquote':
       case 'multilineblockquote':
         return (
-          <blockquote key={index} className="border-l-4 border-neutral-400 pl-4 italic text-neutral-700 dark:text-neutral-300 my-1">
+          <blockquote key={index} className="border-l-4 border-neutral-400 pl-4 italic text-neutral-700 dark:text-neutral-300 my-1 whitespace-pre-line">
             {element.content}
           </blockquote>
         );
