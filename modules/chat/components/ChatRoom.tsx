@@ -157,11 +157,41 @@ export const ChatRoom = ({ isWidget = false }: { isWidget?: boolean }) => {
           schema: "public",
           table: "messages",
         },
-        (payload) => {
-          setMessages((prevMessages) => [
-            ...prevMessages,
-            payload.new as MessageProps,
-          ]);
+        async (payload) => {
+          // For new messages, fetch the complete data including attachments
+          const { data: completeMessage, error } = await supabase
+            .from("messages")
+            .select(`
+              *,
+              attachments (
+                id,
+                file_name,
+                file_data,
+                file_size,
+                mime_type,
+                attachment_type,
+                duration_seconds
+              )
+            `)
+            .eq('id', payload.new.id)
+            .single();
+
+          if (!error && completeMessage) {
+            const transformedMessage = {
+              ...completeMessage,
+              attachments: completeMessage.attachments || []
+            };
+            setMessages((prevMessages) => [
+              ...prevMessages,
+              transformedMessage as MessageProps,
+            ]);
+          } else {
+            // Fallback to original payload if fetch fails
+            setMessages((prevMessages) => [
+              ...prevMessages,
+              payload.new as MessageProps,
+            ]);
+          }
         },
       )
       .on(

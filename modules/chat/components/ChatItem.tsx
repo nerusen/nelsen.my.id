@@ -17,7 +17,6 @@ import { FiDownload as DownloadIcon } from "react-icons/fi";
 import { FiPlay as PlayIcon } from "react-icons/fi";
 import { FiPause as PauseIcon } from "react-icons/fi";
 
-import ChatTime from "./ChatTime";
 import MessageRenderer from "./MessageRenderer";
 import ImageModal from "./ImageModal";
 
@@ -160,6 +159,14 @@ const ChatItem = ({
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const truncateFileName = (fileName: string, maxLength: number = 20) => {
+    if (fileName.length <= maxLength) return fileName;
+    const extension = fileName.split('.').pop();
+    const nameWithoutExt = fileName.substring(0, fileName.lastIndexOf('.'));
+    const truncatedName = nameWithoutExt.substring(0, maxLength - extension!.length - 4) + '...';
+    return truncatedName + '.' + extension;
+  };
+
   const handleEditCancel = () => {
     setEditMessage(message);
     onEditCancel?.();
@@ -217,7 +224,9 @@ const ChatItem = ({
         >
 
           <div className="hidden md:flex">
-            <ChatTime datetime={created_at} />
+            <div className="text-xs font-medium tracking-wide text-neutral-500">
+              {new Date(created_at).toLocaleTimeString()}
+            </div>
           </div>
         </div>
         <div
@@ -345,18 +354,18 @@ const ChatItem = ({
                             const progressPercent = duration > 0 ? (progress / duration) * 100 : 0;
 
                             return (
-                              <div key={attachment.id} className="flex items-center gap-3 bg-neutral-100 dark:bg-neutral-800 p-3 rounded-lg">
+                              <div key={attachment.id} className="flex items-center gap-2 bg-neutral-100 dark:bg-neutral-800 p-2 rounded-lg max-w-xs">
                                 <button
                                   onClick={() => isPlaying ? handleAudioPause(attachment.id) : handleAudioPlay(attachment.id, attachment.file_data)}
-                                  className="flex-shrink-0 bg-emerald-500 hover:bg-emerald-600 text-white p-2 rounded-full transition-colors"
+                                  className="flex-shrink-0 bg-emerald-500 hover:bg-emerald-600 text-white p-1.5 rounded-full transition-colors"
                                 >
-                                  {isPlaying ? <PauseIcon size={16} /> : <PlayIcon size={16} />}
+                                  {isPlaying ? <PauseIcon size={14} /> : <PlayIcon size={14} />}
                                 </button>
-                                <div className="flex-1">
-                                  <div className="text-sm font-medium mb-1">{attachment.file_name}</div>
-                                  <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2 mb-1">
+                                <div className="flex-1 min-w-0">
+                                  <div className="text-xs font-medium mb-1 truncate" title={attachment.file_name}>{truncateFileName(attachment.file_name, 15)}</div>
+                                  <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-1.5 mb-1">
                                     <div
-                                      className="bg-emerald-500 h-2 rounded-full transition-all duration-300"
+                                      className="bg-emerald-500 h-1.5 rounded-full transition-all duration-300"
                                       style={{ width: `${progressPercent}%` }}
                                     ></div>
                                   </div>
@@ -368,19 +377,19 @@ const ChatItem = ({
                             );
                           } else if (attachment.attachment_type === 'document') {
                             return (
-                              <div key={attachment.id} className="flex items-center gap-3 bg-neutral-100 dark:bg-neutral-800 p-3 rounded-lg">
-                                <FileIcon size={24} className="flex-shrink-0 text-neutral-600 dark:text-neutral-400" />
-                                <div className="flex-1">
-                                  <div className="text-sm font-medium">{attachment.file_name}</div>
+                              <div key={attachment.id} className="flex items-center gap-2 bg-neutral-100 dark:bg-neutral-800 p-2 rounded-lg max-w-xs">
+                                <FileIcon size={20} className="flex-shrink-0 text-neutral-600 dark:text-neutral-400" />
+                                <div className="flex-1 min-w-0">
+                                  <div className="text-xs font-medium truncate" title={attachment.file_name}>{truncateFileName(attachment.file_name, 18)}</div>
                                   <div className="text-xs text-neutral-600 dark:text-neutral-400">
                                     {(attachment.file_size / 1024).toFixed(1)} KB
                                   </div>
                                 </div>
                                 <button
                                   onClick={() => handleDownload(attachment.file_data, attachment.file_name)}
-                                  className="flex-shrink-0 bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full transition-colors"
+                                  className="flex-shrink-0 bg-blue-500 hover:bg-blue-600 text-white p-1.5 rounded-full transition-colors"
                                 >
-                                  <DownloadIcon size={16} />
+                                  <DownloadIcon size={14} />
                                 </button>
                               </div>
                             );
@@ -392,7 +401,9 @@ const ChatItem = ({
                     <MessageRenderer message={message} />
                     <div className="flex justify-between items-center mt-1">
                       {is_pinned && <span className="text-xs text-neutral-500 font-medium inline-flex items-center gap-1"><PinIcon size={12} className="text-neutral-500" /> Pinned</span>}
-                      <ChatTime datetime={created_at} />
+                      <div className="text-xs font-medium tracking-wide text-neutral-500">
+                        {new Date(created_at).toLocaleTimeString()}
+                      </div>
                     </div>
                   </>
                 )}
