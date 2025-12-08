@@ -161,7 +161,7 @@ const ChatItem = ({
             width={40}
             height={40}
             alt={name}
-            className="relative z-10 mt-1 rounded-full border dark:border-neutral-800"
+            className="relative z-10 rounded-full border dark:border-neutral-800"
           />
         </div>
       )}
