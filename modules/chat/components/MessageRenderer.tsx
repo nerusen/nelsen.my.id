@@ -146,38 +146,38 @@ const MessageRenderer = ({ message, className }: MessageRendererProps) => {
         return <code key={index} className="bg-neutral-200 dark:bg-neutral-700 px-1 py-0.5 rounded text-sm font-mono">{element.content}</code>;
       case 'codeblock':
         return (
-          <pre key={index} className="bg-neutral-200 dark:bg-neutral-800 p-3 rounded-md overflow-x-auto font-mono text-sm my-2">
+          <pre key={index} className="bg-neutral-200 dark:bg-neutral-800 p-3 rounded-md overflow-x-auto font-mono text-sm my-1">
             <code>{element.content}</code>
           </pre>
         );
       case 'header':
         const level = (element.fullMatch?.match(/^#+/) || [''])[0].length;
         const sizeClasses = {
-          1: 'text-2xl font-bold',
-          2: 'text-xl font-bold',
-          3: 'text-lg font-bold',
+          1: 'text-2xl font-bold m-0',
+          2: 'text-xl font-bold m-0',
+          3: 'text-lg font-bold m-0',
         };
         if (level === 1) return <h1 key={index} className={sizeClasses[1]}>{element.content}</h1>;
         if (level === 2) return <h2 key={index} className={sizeClasses[2]}>{element.content}</h2>;
         if (level === 3) return <h3 key={index} className={sizeClasses[3]}>{element.content}</h3>;
-        return <h3 key={index} className="text-lg font-bold">{element.content}</h3>;
+        return <h3 key={index} className="text-lg font-bold m-0">{element.content}</h3>;
       case 'blockquote':
       case 'multilineblockquote':
         return (
-          <blockquote key={index} className="border-l-4 border-neutral-400 pl-4 italic text-neutral-700 dark:text-neutral-300 my-2">
+          <blockquote key={index} className="border-l-4 border-neutral-400 pl-4 italic text-neutral-700 dark:text-neutral-300 my-1">
             {element.content}
           </blockquote>
         );
       case 'listitem':
         return (
-          <div key={index} className="flex items-start gap-2 my-1">
+          <div key={index} className="flex items-start gap-2 my-0">
             <span className="text-neutral-500">•</span>
             <span>{element.content}</span>
           </div>
         );
       case 'sublistitem':
         return (
-          <div key={index} className="flex items-start gap-2 my-1 ml-4">
+          <div key={index} className="flex items-start gap-2 my-0 ml-4">
             <span className="text-neutral-500">·</span>
             <span>{element.content}</span>
           </div>
