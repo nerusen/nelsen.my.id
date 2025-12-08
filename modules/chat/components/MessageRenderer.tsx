@@ -45,7 +45,7 @@ const MessageRenderer = ({ message, className }: MessageRendererProps) => {
   }, [message]);
 
   return (
-    <div className={className}>
+    <div className={`${className} whitespace-pre-wrap`}>
       {parts.map((part, index) => {
         if (part.type === 'url') {
           return (
