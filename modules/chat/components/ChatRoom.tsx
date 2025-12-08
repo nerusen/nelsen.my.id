@@ -77,6 +77,10 @@ export const ChatRoom = ({ isWidget = false }: { isWidget?: boolean }) => {
     };
     try {
       await axios.post("/api/chat", newMessageData);
+
+      // Optimistic update: immediately add message with attachments to local state
+      setMessages((prevMessages) => [...prevMessages, newMessageData]);
+
       notif("Successfully to send message");
 
       // Check if this is the user's first message
@@ -158,40 +162,50 @@ export const ChatRoom = ({ isWidget = false }: { isWidget?: boolean }) => {
           table: "messages",
         },
         async (payload) => {
-          // For new messages, fetch the complete data including attachments
-          const { data: completeMessage, error } = await supabase
-            .from("messages")
-            .select(`
-              *,
-              attachments (
-                id,
-                file_name,
-                file_data,
-                file_size,
-                mime_type,
-                attachment_type,
-                duration_seconds
-              )
-            `)
-            .eq('id', payload.new.id)
-            .single();
+          // Check if message already exists (from optimistic update) and update if needed
+          setMessages((prevMessages) => {
+            const messageExists = prevMessages.some(msg => msg.id === payload.new.id);
+            if (messageExists) return prevMessages;
 
-          if (!error && completeMessage) {
-            const transformedMessage = {
-              ...completeMessage,
-              attachments: completeMessage.attachments || []
-            };
-            setMessages((prevMessages) => [
-              ...prevMessages,
-              transformedMessage as MessageProps,
-            ]);
-          } else {
-            // Fallback to original payload if fetch fails
-            setMessages((prevMessages) => [
-              ...prevMessages,
-              payload.new as MessageProps,
-            ]);
-          }
+            // For new messages, fetch the complete data including attachments
+            // Note: We can't use async/await directly in setState callback, so we'll handle this differently
+            supabase
+              .from("messages")
+              .select(`
+                *,
+                attachments (
+                  id,
+                  file_name,
+                  file_data,
+                  file_size,
+                  mime_type,
+                  attachment_type,
+                  duration_seconds
+                )
+              `)
+              .eq('id', payload.new.id)
+              .single()
+              .then(({ data: completeMessage, error }) => {
+                if (!error && completeMessage) {
+                  const transformedMessage = {
+                    ...completeMessage,
+                    attachments: completeMessage.attachments || []
+                  };
+                  setMessages((prevMessages) => [
+                    ...prevMessages,
+                    transformedMessage as MessageProps,
+                  ]);
+                } else {
+                  // Fallback to original payload if fetch fails
+                  setMessages((prevMessages) => [
+                    ...prevMessages,
+                    payload.new as MessageProps,
+                  ]);
+                }
+              });
+
+            return prevMessages;
+          });
         },
       )
       .on(
