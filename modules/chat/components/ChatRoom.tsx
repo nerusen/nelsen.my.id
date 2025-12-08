@@ -53,13 +53,23 @@ export const ChatRoom = ({ isWidget = false }: { isWidget?: boolean }) => {
 
   const handleSendMessage = async (message: string, attachment?: { type: 'image' | 'audio' | 'document'; data: string; name: string } | null) => {
     const messageId = uuidv4();
+    const attachments = attachment ? [{
+      id: uuidv4(),
+      file_name: attachment.name,
+      file_data: attachment.data,
+      file_size: attachment.data.length,
+      mime_type: attachment.type === 'image' ? 'image/jpeg' : attachment.type === 'audio' ? 'audio/mpeg' : 'application/octet-stream',
+      attachment_type: attachment.type,
+      duration_seconds: undefined, // Will be calculated on backend if needed
+    }] : [];
+
     const newMessageData: MessageProps = {
       id: messageId,
       name: session?.user?.name || demoUser?.username || '',
       email: session?.user?.email || demoUser?.email || '',
       image: session?.user?.image || demoUser?.image || undefined,
       message,
-      media: attachment ? [attachment.data] : undefined,
+      attachments,
       is_reply: isReply.is_reply,
       reply_to: isReply.name,
       is_show: true,

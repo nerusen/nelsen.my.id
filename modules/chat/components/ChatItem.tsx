@@ -14,6 +14,8 @@ import { IoClose as CloseIcon } from "react-icons/io5";
 import { FiMusic as MusicIcon } from "react-icons/fi";
 import { FiFileText as FileIcon } from "react-icons/fi";
 import { FiDownload as DownloadIcon } from "react-icons/fi";
+import { FiPlay as PlayIcon } from "react-icons/fi";
+import { FiPause as PauseIcon } from "react-icons/fi";
 
 import ChatTime from "./ChatTime";
 import MessageRenderer from "./MessageRenderer";
@@ -29,7 +31,6 @@ type Attachment = {
 };
 
 interface ChatItemProps extends MessageProps {
-  attachment?: Attachment | null;
   isWidget?: boolean;
   onDelete: (id: string) => void;
   onReply: (name: string) => void;
@@ -48,8 +49,7 @@ const ChatItem = ({
   email,
   image,
   message,
-  media,
-  attachment,
+  attachments,
   created_at,
   reply_to,
   is_reply,
@@ -70,6 +70,9 @@ const ChatItem = ({
   const [editMessage, setEditMessage] = useState(message);
   const [isPopupVisible, setIsPopupVisible] = useState(showPopup || false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [playingAudio, setPlayingAudio] = useState<string | null>(null);
+  const [audioProgress, setAudioProgress] = useState<{ [key: string]: number }>({});
+  const [audioDuration, setAudioDuration] = useState<{ [key: string]: number }>({});
 
   const [isBubbleTogglesVisible, setIsBubbleTogglesVisible] = useState(false);
 
@@ -122,13 +125,39 @@ const ChatItem = ({
     setSelectedImage(imageSrc);
   };
 
-  const handleDownload = (imageSrc: string) => {
+  const handleDownload = (fileData: string, fileName: string) => {
     const link = document.createElement('a');
-    link.href = imageSrc;
-    link.download = 'nelsen.jpg';
+    link.href = fileData;
+    link.download = fileName;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleAudioPlay = (attachmentId: string, audioSrc: string) => {
+    const audio = new Audio(audioSrc);
+    audio.addEventListener('loadedmetadata', () => {
+      setAudioDuration(prev => ({ ...prev, [attachmentId]: audio.duration }));
+    });
+    audio.addEventListener('timeupdate', () => {
+      setAudioProgress(prev => ({ ...prev, [attachmentId]: audio.currentTime }));
+    });
+    audio.addEventListener('ended', () => {
+      setPlayingAudio(null);
+      setAudioProgress(prev => ({ ...prev, [attachmentId]: 0 }));
+    });
+    audio.play();
+    setPlayingAudio(attachmentId);
+  };
+
+  const handleAudioPause = (attachmentId: string) => {
+    setPlayingAudio(null);
+  };
+
+  const formatDuration = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   const handleEditCancel = () => {
@@ -294,19 +323,70 @@ const ChatItem = ({
                 )}
                 {!is_reply && (
                   <>
-                    {media && media.length > 0 && (
-                      <div className="mb-2">
-                        {media.map((mediaItem, index) => (
-                          <Image
-                            key={index}
-                            src={mediaItem}
-                            alt={`Media ${index + 1}`}
-                            width={200}
-                            height={200}
-                            className="rounded-lg cursor-pointer object-cover max-w-full h-auto"
-                            onClick={() => handleImageClick(mediaItem)}
-                          />
-                        ))}
+                    {attachments && attachments.length > 0 && (
+                      <div className="mb-2 space-y-2">
+                        {attachments.map((attachment) => {
+                          if (attachment.attachment_type === 'image') {
+                            return (
+                              <Image
+                                key={attachment.id}
+                                src={attachment.file_data}
+                                alt={attachment.file_name}
+                                width={200}
+                                height={200}
+                                className="rounded-lg cursor-pointer object-cover max-w-full h-auto"
+                                onClick={() => handleImageClick(attachment.file_data)}
+                              />
+                            );
+                          } else if (attachment.attachment_type === 'audio') {
+                            const isPlaying = playingAudio === attachment.id;
+                            const progress = audioProgress[attachment.id] || 0;
+                            const duration = audioDuration[attachment.id] || attachment.duration_seconds || 0;
+                            const progressPercent = duration > 0 ? (progress / duration) * 100 : 0;
+
+                            return (
+                              <div key={attachment.id} className="flex items-center gap-3 bg-neutral-100 dark:bg-neutral-800 p-3 rounded-lg">
+                                <button
+                                  onClick={() => isPlaying ? handleAudioPause(attachment.id) : handleAudioPlay(attachment.id, attachment.file_data)}
+                                  className="flex-shrink-0 bg-emerald-500 hover:bg-emerald-600 text-white p-2 rounded-full transition-colors"
+                                >
+                                  {isPlaying ? <PauseIcon size={16} /> : <PlayIcon size={16} />}
+                                </button>
+                                <div className="flex-1">
+                                  <div className="text-sm font-medium mb-1">{attachment.file_name}</div>
+                                  <div className="w-full bg-neutral-200 dark:bg-neutral-700 rounded-full h-2 mb-1">
+                                    <div
+                                      className="bg-emerald-500 h-2 rounded-full transition-all duration-300"
+                                      style={{ width: `${progressPercent}%` }}
+                                    ></div>
+                                  </div>
+                                  <div className="text-xs text-neutral-600 dark:text-neutral-400">
+                                    {formatDuration(progress)} / {formatDuration(duration)}
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          } else if (attachment.attachment_type === 'document') {
+                            return (
+                              <div key={attachment.id} className="flex items-center gap-3 bg-neutral-100 dark:bg-neutral-800 p-3 rounded-lg">
+                                <FileIcon size={24} className="flex-shrink-0 text-neutral-600 dark:text-neutral-400" />
+                                <div className="flex-1">
+                                  <div className="text-sm font-medium">{attachment.file_name}</div>
+                                  <div className="text-xs text-neutral-600 dark:text-neutral-400">
+                                    {(attachment.file_size / 1024).toFixed(1)} KB
+                                  </div>
+                                </div>
+                                <button
+                                  onClick={() => handleDownload(attachment.file_data, attachment.file_name)}
+                                  className="flex-shrink-0 bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full transition-colors"
+                                >
+                                  <DownloadIcon size={16} />
+                                </button>
+                              </div>
+                            );
+                          }
+                          return null;
+                        })}
                       </div>
                     )}
                     <MessageRenderer message={message} />
@@ -419,7 +499,7 @@ const ChatItem = ({
         <ImageModal
           imageSrc={selectedImage}
           onClose={() => setSelectedImage(null)}
-          onDownload={handleDownload}
+          onDownload={(imageSrc) => handleDownload(imageSrc, 'image.jpg')}
         />
       )}
     </div>
