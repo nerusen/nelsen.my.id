@@ -200,11 +200,11 @@ const ChatInput = ({
             onClick={handleSendMessage}
             className={clsx(
               "ml-2 rounded-md p-3 text-black dark:text-white transition duration-100 active:scale-90",
-              (message.trim() || media.length > 0)
+              (message.trim() || attachment !== null)
                 ? "bg-emerald-500 hover:bg-emerald-400 dark:bg-emerald-600 dark:hover:bg-emerald-500"
                 : "cursor-not-allowed bg-white border border-neutral-300 dark:bg-[#1F1F1F] dark:border-[#3A3A3A] active:scale-100",
             )}
-            disabled={isSending || (!message.trim() && media.length === 0)}
+            disabled={isSending || (!message.trim() && attachment === null)}
             data-umami-event="click_send_message"
           >
             <SendIcon size={18} />
