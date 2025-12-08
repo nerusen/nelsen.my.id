@@ -17,6 +17,7 @@ import { FiDownload as DownloadIcon } from "react-icons/fi";
 import { FiPlay as PlayIcon } from "react-icons/fi";
 import { FiPause as PauseIcon } from "react-icons/fi";
 
+import ChatTime from "./ChatTime";
 import MessageRenderer from "./MessageRenderer";
 import ImageModal from "./ImageModal";
 
@@ -224,9 +225,7 @@ const ChatItem = ({
         >
 
           <div className="hidden md:flex">
-            <div className="text-xs font-medium tracking-wide text-neutral-500">
-              {new Date(created_at).toLocaleTimeString()}
-            </div>
+            <ChatTime datetime={created_at} />
           </div>
         </div>
         <div
@@ -401,9 +400,7 @@ const ChatItem = ({
                     <MessageRenderer message={message} />
                     <div className="flex justify-between items-center mt-1">
                       {is_pinned && <span className="text-xs text-neutral-500 font-medium inline-flex items-center gap-1"><PinIcon size={12} className="text-neutral-500" /> Pinned</span>}
-                      <div className="text-xs font-medium tracking-wide text-neutral-500">
-                        {new Date(created_at).toLocaleTimeString()}
-                      </div>
+                      <ChatTime datetime={created_at} />
                     </div>
                   </>
                 )}
