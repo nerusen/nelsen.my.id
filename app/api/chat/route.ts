@@ -4,23 +4,29 @@ import { NextResponse } from "next/server";
 export const GET = async () => {
   const supabase = createClient();
   try {
-    // Get messages with their associated images
+    // Get messages with their associated attachments
     const { data: messages, error: messagesError } = await supabase
       .from("messages")
       .select(`
         *,
-        images (
-          image_data
+        attachments (
+          id,
+          file_name,
+          file_data,
+          file_size,
+          mime_type,
+          attachment_type,
+          duration_seconds
         )
       `)
       .order('created_at', { ascending: true });
 
     if (messagesError) throw messagesError;
 
-    // Transform the data to include media array
+    // Transform the data to include attachments array
     const transformedMessages = messages?.map(message => ({
       ...message,
-      media: message.images?.map((img: any) => img.image_data) || []
+      attachments: message.attachments || []
     }));
 
     return NextResponse.json(transformedMessages, { status: 200 });
@@ -37,7 +43,7 @@ export const POST = async (req: Request) => {
   const supabase = createClient();
   try {
     const body = await req.json();
-    const { media, ...messageData } = body;
+    const { attachments, ...messageData } = body;
 
     // Insert message first
     const { data: messageResult, error: messageError } = await supabase
@@ -48,24 +54,29 @@ export const POST = async (req: Request) => {
 
     if (messageError) throw messageError;
 
-    // If there are media files, insert them
-    if (media && media.length > 0) {
-      const mediaData = media.map((imageData: string) => ({
+    // If there are attachments, insert them
+    if (attachments && attachments.length > 0) {
+      const attachmentData = attachments.map((attachment: any) => ({
         message_id: messageResult.id,
-        image_data: imageData,
         user_email: messageData.email,
+        file_name: attachment.file_name,
+        file_data: attachment.file_data,
+        file_size: attachment.file_size,
+        mime_type: attachment.mime_type,
+        attachment_type: attachment.attachment_type,
+        duration_seconds: attachment.duration_seconds,
       }));
 
-      const { error: mediaError } = await supabase
-        .from("images")
-        .insert(mediaData);
+      const { error: attachmentError } = await supabase
+        .from("attachments")
+        .insert(attachmentData);
 
-      if (mediaError) throw mediaError;
+      if (attachmentError) throw attachmentError;
     }
 
     return NextResponse.json("Data saved successfully", { status: 200 });
   } catch (error) {
-    console.error("Error saving message with media:", error);
+    console.error("Error saving message with attachments:", error);
     return NextResponse.json(
       { message: "Internal Server Error" },
       { status: 500 },
