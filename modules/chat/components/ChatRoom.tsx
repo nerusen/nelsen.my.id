@@ -197,6 +197,46 @@ export const ChatRoom = ({ isWidget = false }: { isWidget?: boolean }) => {
       .on(
         "postgres_changes",
         {
+          event: "INSERT",
+          schema: "public",
+          table: "attachments",
+        },
+        async (payload) => {
+          // When a new attachment is inserted, fetch the associated message with all attachments
+          const messageId = payload.new.message_id;
+          const { data: completeMessage, error } = await supabase
+            .from("messages")
+            .select(`
+              *,
+              attachments (
+                id,
+                file_name,
+                file_data,
+                file_size,
+                mime_type,
+                attachment_type,
+                duration_seconds
+              )
+            `)
+            .eq('id', messageId)
+            .single();
+
+          if (!error && completeMessage) {
+            const transformedMessage = {
+              ...completeMessage,
+              attachments: completeMessage.attachments || []
+            };
+            setMessages((prevMessages) =>
+              prevMessages.map((msg) =>
+                msg.id === messageId ? transformedMessage as MessageProps : msg,
+              ),
+            );
+          }
+        },
+      )
+      .on(
+        "postgres_changes",
+        {
           event: "DELETE",
           schema: "public",
           table: "messages",
