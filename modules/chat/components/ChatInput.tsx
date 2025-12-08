@@ -144,15 +144,16 @@ const ChatInput = ({
           </div>
         )}
         <div className="flex">
-          <input
-            type="text"
+          <textarea
             value={message}
             onChange={handleChange}
+            onKeyDown={handleKeyDown}
             placeholder={t("placeholder")}
             disabled={isSending}
             ref={inputRef}
             autoFocus
-            className="flex-grow rounded-md border p-2 focus:outline-none dark:border-[#3A3A3A] dark:bg-[#1F1F1F]"
+            rows={1}
+            className="flex-grow rounded-md border p-2 focus:outline-none dark:border-[#3A3A3A] dark:bg-[#1F1F1F] resize-none max-h-32 overflow-y-auto"
           />
           <input
             type="file"
