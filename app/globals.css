@@ -95,8 +95,6 @@
 .google-profile-border {
   position: relative;
   display: inline-block;
-  width: 44px;
-  height: 44px;
   border-radius: 50%;
   background: conic-gradient(
     from -20deg,
