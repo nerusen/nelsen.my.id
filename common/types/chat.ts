@@ -4,7 +4,7 @@ export interface MessageProps {
   email: string;
   image?: string;
   message: string;
-  media?: string[]; // Array of base64 image strings
+  attachments?: AttachmentProps[];
   is_reply?: boolean;
   reply_to?: string;
   created_at: string;
@@ -17,6 +17,16 @@ export interface MessageProps {
   conversation_id?: string;
   message_type?: string;
   metadata?: any;
+}
+
+export interface AttachmentProps {
+  id: string;
+  file_name: string;
+  file_data: string;
+  file_size: number;
+  mime_type: string;
+  attachment_type: 'image' | 'audio' | 'document';
+  duration_seconds?: number;
 }
 
 export interface ChatListProps {
