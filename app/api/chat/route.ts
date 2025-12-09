@@ -60,7 +60,9 @@ export const POST = async (req: Request) => {
         message_id: messageResult.id,
         user_email: messageData.email,
         file_name: attachment.file_name,
-        file_data: attachment.file_data,
+        file_data: attachment.file_data, // This is now the public URL
+        storage_path: attachment.storage_path,
+        public_url: attachment.public_url,
         file_size: attachment.file_size,
         mime_type: attachment.mime_type,
         attachment_type: attachment.attachment_type,
