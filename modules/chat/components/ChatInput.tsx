@@ -44,7 +44,7 @@ const ChatInput = ({
 
   const t = useTranslations("ChatRoomPage");
 
-  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
+  const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB in bytes
 
   const handleSendMessage = (e: FormEvent) => {
     e.preventDefault();
