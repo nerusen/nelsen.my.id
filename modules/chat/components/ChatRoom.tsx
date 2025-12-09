@@ -19,7 +19,11 @@ import { createClient } from "@/common/utils/client";
 import useNotif from "@/hooks/useNotif";
 
 export const ChatRoom = ({ isWidget = false }: { isWidget?: boolean }) => {
-  const { data, isLoading, error } = useSWR("/api/chat", fetcher);
+  const { data, isLoading, error } = useSWR("/api/chat", fetcher, {
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    revalidateOnMount: true,
+  });
 
   const [messages, setMessages] = useState<MessageProps[]>([]);
   const [isReply, setIsReply] = useState({ is_reply: false, name: "" });
@@ -78,9 +82,6 @@ export const ChatRoom = ({ isWidget = false }: { isWidget?: boolean }) => {
     try {
       await axios.post("/api/chat", newMessageData);
 
-      // Optimistic update: immediately add message with attachments to local state
-      setMessages((prevMessages) => [...prevMessages, newMessageData]);
-
       notif("Successfully to send message");
 
       // Check if this is the user's first message
@@ -125,8 +126,8 @@ export const ChatRoom = ({ isWidget = false }: { isWidget?: boolean }) => {
   };
 
   useEffect(() => {
-    if (data) setMessages(data);
-  }, [data]);
+    if (data && messages.length === 0) setMessages(data);
+  }, [data, messages.length]);
 
   // Load demo user from localStorage on mount
   useEffect(() => {
@@ -162,62 +163,7 @@ export const ChatRoom = ({ isWidget = false }: { isWidget?: boolean }) => {
           table: "messages",
         },
         async (payload) => {
-          // Check if message already exists (from optimistic update) and update if needed
-          setMessages((prevMessages) => {
-            const messageExists = prevMessages.some(msg => msg.id === payload.new.id);
-            if (messageExists) return prevMessages;
-
-            // For new messages, fetch the complete data including attachments
-            // Note: We can't use async/await directly in setState callback, so we'll handle this differently
-            supabase
-              .from("messages")
-              .select(`
-                *,
-                attachments (
-                  id,
-                  file_name,
-                  file_data,
-                  file_size,
-                  mime_type,
-                  attachment_type,
-                  duration_seconds
-                )
-              `)
-              .eq('id', payload.new.id)
-              .single()
-              .then(({ data: completeMessage, error }) => {
-                if (!error && completeMessage) {
-                  const transformedMessage = {
-                    ...completeMessage,
-                    attachments: completeMessage.attachments || []
-                  };
-                  setMessages((prevMessages) => [
-                    ...prevMessages,
-                    transformedMessage as MessageProps,
-                  ]);
-                } else {
-                  // Fallback to original payload if fetch fails
-                  setMessages((prevMessages) => [
-                    ...prevMessages,
-                    payload.new as MessageProps,
-                  ]);
-                }
-              });
-
-            return prevMessages;
-          });
-        },
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "attachments",
-        },
-        async (payload) => {
-          // When a new attachment is inserted, fetch the associated message with all attachments
-          const messageId = payload.new.message_id;
+          // Always fetch complete message data with attachments to ensure we have the latest data
           const { data: completeMessage, error } = await supabase
             .from("messages")
             .select(`
@@ -232,7 +178,7 @@ export const ChatRoom = ({ isWidget = false }: { isWidget?: boolean }) => {
                 duration_seconds
               )
             `)
-            .eq('id', messageId)
+            .eq('id', payload.new.id)
             .single();
 
           if (!error && completeMessage) {
@@ -240,14 +186,24 @@ export const ChatRoom = ({ isWidget = false }: { isWidget?: boolean }) => {
               ...completeMessage,
               attachments: completeMessage.attachments || []
             };
-            setMessages((prevMessages) =>
-              prevMessages.map((msg) =>
-                msg.id === messageId ? transformedMessage as MessageProps : msg,
-              ),
-            );
+
+            setMessages((prevMessages) => {
+              // Check if message already exists, if so update it, otherwise add it
+              const existingIndex = prevMessages.findIndex(msg => msg.id === payload.new.id);
+              if (existingIndex >= 0) {
+                // Update existing message
+                const updatedMessages = [...prevMessages];
+                updatedMessages[existingIndex] = transformedMessage as MessageProps;
+                return updatedMessages;
+              } else {
+                // Add new message
+                return [...prevMessages, transformedMessage as MessageProps];
+              }
+            });
           }
         },
       )
+
       .on(
         "postgres_changes",
         {
