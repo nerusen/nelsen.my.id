@@ -122,7 +122,7 @@ const ChatInput = ({
 
       if (uploadError) {
         console.error('Upload error:', uploadError);
-        alert('Failed to upload file. Please try again.');
+        alert(`Failed to upload file: ${uploadError.message}. Please check if the storage bucket exists and policies are set up correctly.`);
         setIsUploading(false);
         return;
       }
