@@ -55,13 +55,15 @@ export const ChatRoom = ({ isWidget = false }: { isWidget?: boolean }) => {
     setIsReply({ is_reply: false, name: "" });
   };
 
-  const handleSendMessage = async (message: string, attachment?: { type: 'image' | 'audio' | 'document'; data: string; name: string } | null) => {
+  const handleSendMessage = async (message: string, attachment?: { type: 'image' | 'audio' | 'document'; data: string; name: string; storagePath?: string; publicUrl?: string } | null) => {
     const messageId = uuidv4();
     const attachments = attachment ? [{
       id: uuidv4(),
       file_name: attachment.name,
-      file_data: attachment.data,
-      file_size: attachment.data.length,
+      file_data: attachment.data, // This will be the public URL now
+      storage_path: attachment.storagePath || '',
+      public_url: attachment.publicUrl || '',
+      file_size: 0, // Will be calculated on backend
       mime_type: attachment.type === 'image' ? 'image/jpeg' : attachment.type === 'audio' ? 'audio/mpeg' : 'application/octet-stream',
       attachment_type: attachment.type,
       duration_seconds: undefined, // Will be calculated on backend if needed
@@ -79,6 +81,10 @@ export const ChatRoom = ({ isWidget = false }: { isWidget?: boolean }) => {
       is_show: true,
       created_at: new Date().toISOString(),
     };
+
+    // Optimistically add the message to local state immediately
+    setMessages((prevMessages) => [...prevMessages, newMessageData]);
+
     try {
       await axios.post("/api/chat", newMessageData);
 
@@ -95,6 +101,8 @@ export const ChatRoom = ({ isWidget = false }: { isWidget?: boolean }) => {
     } catch (error) {
       console.error("Error:", error);
       notif("Failed to send message");
+      // Remove the optimistically added message on error
+      setMessages((prevMessages) => prevMessages.filter(msg => msg.id !== messageId));
     }
   };
 

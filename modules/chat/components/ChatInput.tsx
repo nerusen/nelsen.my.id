@@ -10,11 +10,14 @@ import { useTranslations } from "next-intl";
 import Image from "next/image";
 
 import { ChatInputProps } from "@/common/types/chat";
+import { createClient } from "@/common/utils/client";
 
 type Attachment = {
   type: 'image' | 'audio' | 'document';
   data: string;
   name: string;
+  storagePath?: string;
+  publicUrl?: string;
 };
 
 interface ChatInputPropsNew extends ChatInputProps {
@@ -33,6 +36,8 @@ const ChatInput = ({
   const [message, setMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [attachment, setAttachment] = useState<Attachment | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isUploading, setIsUploading] = useState(false);
 
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -62,7 +67,7 @@ const ChatInput = ({
     }
   };
 
-  const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
@@ -85,12 +90,66 @@ const ChatInput = ({
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const result = e.target?.result as string;
-      setAttachment({ type, data: result, name: file.name });
-    };
-    reader.readAsDataURL(file);
+    // Start upload
+    setIsUploading(true);
+    setUploadProgress(0);
+
+    try {
+      const supabase = createClient();
+      const { data: session } = await supabase.auth.getSession();
+
+      if (!session?.session?.user?.email) {
+        alert('You must be logged in to upload files');
+        setIsUploading(false);
+        return;
+      }
+
+      // Create unique filename
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const storagePath = `${session.session.user.email}/${fileName}`;
+
+      // Upload to Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('chat-attachments')
+        .upload(storagePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        alert('Failed to upload file. Please try again.');
+        setIsUploading(false);
+        return;
+      }
+
+      // Get public URL
+      const { data: publicUrlData } = supabase.storage
+        .from('chat-attachments')
+        .getPublicUrl(storagePath);
+
+      setUploadProgress(100);
+
+      // Set attachment with storage info
+      setTimeout(() => {
+        setAttachment({
+          type,
+          data: publicUrlData.publicUrl, // Use public URL instead of base64
+          name: file.name,
+          storagePath,
+          publicUrl: publicUrlData.publicUrl
+        });
+        setIsUploading(false);
+        setUploadProgress(0);
+      }, 200);
+
+    } catch (error) {
+      console.error('File upload error:', error);
+      alert('Failed to upload file. Please try again.');
+      setIsUploading(false);
+      setUploadProgress(0);
+    }
 
     // Reset file input
     e.target.value = '';
@@ -143,30 +202,57 @@ const ChatInput = ({
             />
           </motion.div>
         )}
-        {attachment && (
+        {(attachment || isUploading) && (
           <div className="flex gap-2">
-            <div className="relative flex items-center gap-2 bg-neutral-200 dark:bg-neutral-800 px-3 py-2 rounded-lg">
-              {attachment.type === 'image' ? (
-                <Image
-                  src={attachment.data}
-                  alt="Attachment preview"
-                  width={40}
-                  height={40}
-                  className="rounded object-cover"
-                />
-              ) : attachment.type === 'audio' ? (
-                <MusicIcon size={24} />
-              ) : (
-                <FileIcon size={24} />
-              )}
-              <span className="text-sm truncate max-w-32">{attachment.name}</span>
-              <button
-                type="button"
-                onClick={removeAttachment}
-                className="bg-red-500 bg-opacity-80 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
-              >
-                <CloseIcon size={12} />
-              </button>
+            <div className="relative flex items-center gap-2 bg-neutral-200 dark:bg-neutral-800 px-3 py-2 rounded-lg min-w-[200px]">
+              {isUploading ? (
+                <>
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-neutral-300 dark:bg-neutral-600 rounded animate-pulse"></div>
+                    <div className="flex-1">
+                      <div className="text-sm text-neutral-600 dark:text-neutral-400 mb-1">Uploading...</div>
+                      <div className="w-full bg-neutral-300 dark:bg-neutral-600 rounded-full h-2 mb-1">
+                        <div
+                          className="bg-emerald-500 h-2 rounded-full transition-all duration-300"
+                          style={{ width: `${uploadProgress}%` }}
+                        ></div>
+                      </div>
+                      <div className="text-xs text-neutral-500 dark:text-neutral-400">
+                        {uploadProgress.toFixed(0)}% • Calculating size...
+                      </div>
+                    </div>
+                  </div>
+                </>
+              ) : attachment ? (
+                <>
+                  {attachment.type === 'image' ? (
+                    <Image
+                      src={attachment.data}
+                      alt="Attachment preview"
+                      width={40}
+                      height={40}
+                      className="rounded object-cover"
+                    />
+                  ) : attachment.type === 'audio' ? (
+                    <MusicIcon size={24} />
+                  ) : (
+                    <FileIcon size={24} />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <span className="text-sm truncate block">{attachment.name}</span>
+                    <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                      {(attachment.data.length / 1024).toFixed(1)} KB
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={removeAttachment}
+                    className="bg-red-500 bg-opacity-80 text-white rounded-full p-1 hover:bg-red-600 transition-colors"
+                  >
+                    <CloseIcon size={12} />
+                  </button>
+                </>
+              ) : null}
             </div>
           </div>
         )}

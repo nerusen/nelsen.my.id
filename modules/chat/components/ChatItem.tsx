@@ -334,16 +334,19 @@ const ChatItem = ({
                     {attachments && attachments.length > 0 && (
                       <div className="mb-2 space-y-2">
                         {attachments.map((attachment) => {
+                          // Use public_url if available, otherwise fallback to file_data
+                          const mediaUrl = attachment.public_url || attachment.file_data;
+
                           if (attachment.attachment_type === 'image') {
                             return (
                               <Image
                                 key={attachment.id}
-                                src={attachment.file_data}
+                                src={mediaUrl}
                                 alt={attachment.file_name}
                                 width={200}
                                 height={200}
                                 className="rounded-lg cursor-pointer object-cover max-w-full h-auto"
-                                onClick={() => handleImageClick(attachment.file_data)}
+                                onClick={() => handleImageClick(mediaUrl)}
                               />
                             );
                           } else if (attachment.attachment_type === 'audio') {
@@ -355,7 +358,7 @@ const ChatItem = ({
                             return (
                               <div key={attachment.id} className="flex items-center gap-2 bg-neutral-100 dark:bg-neutral-800 p-2 rounded-lg max-w-xs">
                                 <button
-                                  onClick={() => isPlaying ? handleAudioPause(attachment.id) : handleAudioPlay(attachment.id, attachment.file_data)}
+                                  onClick={() => isPlaying ? handleAudioPause(attachment.id) : handleAudioPlay(attachment.id, mediaUrl)}
                                   className="flex-shrink-0 bg-emerald-500 hover:bg-emerald-600 text-white p-1.5 rounded-full transition-colors"
                                 >
                                   {isPlaying ? <PauseIcon size={14} /> : <PlayIcon size={14} />}
@@ -385,7 +388,7 @@ const ChatItem = ({
                                   </div>
                                 </div>
                                 <button
-                                  onClick={() => handleDownload(attachment.file_data, attachment.file_name)}
+                                  onClick={() => handleDownload(mediaUrl, attachment.file_name)}
                                   className="flex-shrink-0 bg-blue-500 hover:bg-blue-600 text-white p-1.5 rounded-full transition-colors"
                                 >
                                   <DownloadIcon size={14} />
