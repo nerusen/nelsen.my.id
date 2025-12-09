@@ -8,6 +8,7 @@ import { FiMusic as MusicIcon } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
+import { useSession } from "next-auth/react";
 
 import { ChatInputProps } from "@/common/types/chat";
 import { createClient } from "@/common/utils/client";
@@ -95,19 +96,19 @@ const ChatInput = ({
     setUploadProgress(0);
 
     try {
-      const supabase = createClient();
-      const { data: session } = await supabase.auth.getSession();
-
-      if (!session?.session?.user?.email) {
+      // Check if user is logged in via NextAuth
+      if (!session?.user?.email) {
         alert('You must be logged in to upload files');
         setIsUploading(false);
         return;
       }
 
+      const supabase = createClient();
+
       // Create unique filename
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const storagePath = `${session.session.user.email}/${fileName}`;
+      const storagePath = `${session.user.email}/${fileName}`;
 
       // Upload to Supabase Storage
       const { data: uploadData, error: uploadError } = await supabase.storage
