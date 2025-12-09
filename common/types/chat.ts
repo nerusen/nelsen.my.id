@@ -23,6 +23,8 @@ export interface AttachmentProps {
   id: string;
   file_name: string;
   file_data: string;
+  storage_path?: string;
+  public_url?: string;
   file_size: number;
   mime_type: string;
   attachment_type: 'image' | 'audio' | 'document';
