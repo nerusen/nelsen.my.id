@@ -385,7 +385,7 @@ const ChatItem = ({
                             const progressPercent = duration > 0 ? (progress / duration) * 100 : 0;
 
                             return (
-                              <div key={attachment.id} className={clsx("flex items-center gap-2 p-2 rounded-lg max-w-xs", condition ? "bg-[#21263F]" : "bg-neutral-100 dark:bg-neutral-800")}>
+                              <div key={attachment.id} className={clsx("flex items-center gap-2 p-2 rounded-lg max-w-xs", condition ? "bg-[#F7F8FF] dark:bg-[#21263F]" : "bg-neutral-100 dark:bg-neutral-800")}>
                                 <button
                                   onClick={() => isPlaying ? handleAudioPause(attachment.id) : handleAudioPlay(attachment.id, mediaUrl)}
                                   className="flex-shrink-0 bg-emerald-500 hover:bg-emerald-600 text-white p-1.5 rounded-full transition-colors"
