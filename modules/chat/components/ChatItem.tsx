@@ -73,6 +73,7 @@ const ChatItem = ({
   const [playingAudio, setPlayingAudio] = useState<string | null>(null);
   const [audioProgress, setAudioProgress] = useState<{ [key: string]: number }>({});
   const [audioDuration, setAudioDuration] = useState<{ [key: string]: number }>({});
+  const [audioInstances, setAudioInstances] = useState<{ [key: string]: HTMLAudioElement }>({});
 
   const [isBubbleTogglesVisible, setIsBubbleTogglesVisible] = useState(false);
 
@@ -135,22 +136,50 @@ const ChatItem = ({
   };
 
   const handleAudioPlay = (attachmentId: string, audioSrc: string) => {
-    const audio = new Audio(audioSrc);
-    audio.addEventListener('loadedmetadata', () => {
-      setAudioDuration(prev => ({ ...prev, [attachmentId]: audio.duration }));
-    });
-    audio.addEventListener('timeupdate', () => {
-      setAudioProgress(prev => ({ ...prev, [attachmentId]: audio.currentTime }));
-    });
-    audio.addEventListener('ended', () => {
+    // Stop any currently playing audio
+    if (playingAudio && playingAudio !== attachmentId) {
+      const currentAudio = audioInstances[playingAudio];
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+      }
       setPlayingAudio(null);
-      setAudioProgress(prev => ({ ...prev, [attachmentId]: 0 }));
-    });
+    }
+
+    // Check if we already have an audio instance for this attachment
+    let audio = audioInstances[attachmentId];
+
+    if (!audio) {
+      // Create new audio instance
+      audio = new Audio(audioSrc);
+      audio.addEventListener('loadedmetadata', () => {
+        setAudioDuration(prev => ({ ...prev, [attachmentId]: audio.duration }));
+      });
+      audio.addEventListener('timeupdate', () => {
+        setAudioProgress(prev => ({ ...prev, [attachmentId]: audio.currentTime }));
+      });
+      audio.addEventListener('ended', () => {
+        setPlayingAudio(null);
+        setAudioProgress(prev => ({ ...prev, [attachmentId]: 0 }));
+      });
+      audio.addEventListener('pause', () => {
+        setPlayingAudio(null);
+      });
+
+      // Store the audio instance
+      setAudioInstances(prev => ({ ...prev, [attachmentId]: audio }));
+    }
+
+    // Play the audio
     audio.play();
     setPlayingAudio(attachmentId);
   };
 
   const handleAudioPause = (attachmentId: string) => {
+    const audio = audioInstances[attachmentId];
+    if (audio) {
+      audio.pause();
+    }
     setPlayingAudio(null);
   };
 
@@ -356,7 +385,7 @@ const ChatItem = ({
                             const progressPercent = duration > 0 ? (progress / duration) * 100 : 0;
 
                             return (
-                              <div key={attachment.id} className="flex items-center gap-2 bg-neutral-100 dark:bg-neutral-800 p-2 rounded-lg max-w-xs">
+                              <div key={attachment.id} className={clsx("flex items-center gap-2 p-2 rounded-lg max-w-xs", condition ? "bg-[#21263F]" : "bg-neutral-100 dark:bg-neutral-800")}>
                                 <button
                                   onClick={() => isPlaying ? handleAudioPause(attachment.id) : handleAudioPlay(attachment.id, mediaUrl)}
                                   className="flex-shrink-0 bg-emerald-500 hover:bg-emerald-600 text-white p-1.5 rounded-full transition-colors"
@@ -379,7 +408,7 @@ const ChatItem = ({
                             );
                           } else if (attachment.attachment_type === 'document') {
                             return (
-                              <div key={attachment.id} className="flex items-center gap-2 bg-neutral-100 dark:bg-neutral-800 p-2 rounded-lg max-w-xs">
+                              <div key={attachment.id} className={clsx("flex items-center gap-2 p-2 rounded-lg max-w-xs", condition ? "bg-[#21263F]" : "bg-neutral-100 dark:bg-neutral-800")}>
                                 <FileIcon size={20} className="flex-shrink-0 text-neutral-600 dark:text-neutral-400" />
                                 <div className="flex-1 min-w-0">
                                   <div className="text-xs font-medium truncate" title={attachment.file_name}>{truncateFileName(attachment.file_name, 18)}</div>
