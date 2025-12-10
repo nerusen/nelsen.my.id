@@ -11,7 +11,6 @@ import Image from "next/image";
 import { useSession } from "next-auth/react";
 
 import { ChatInputProps } from "@/common/types/chat";
-import { createClient } from "@/common/utils/client";
 
 type Attachment = {
   type: 'image' | 'audio' | 'document';
@@ -105,32 +104,28 @@ const ChatInput = ({
         return;
       }
 
-      const supabase = createClient();
+      // Upload via API route (server-side) to bypass CORS issues
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('userEmail', session.user.email);
 
-      // Create unique filename
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const storagePath = `${session.user.email}/${fileName}`;
+      setUploadProgress(30);
 
-      // Upload to Supabase Storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('chat-attachments')
-        .upload(storagePath, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
 
-      if (uploadError) {
-        console.error('Upload error:', uploadError);
-        alert(`Failed to upload file: ${uploadError.message}. Please check if the storage bucket exists and policies are set up correctly.`);
+      const result = await response.json();
+
+      if (!response.ok) {
+        console.error('Upload error:', result);
+        alert(`Failed to upload file: ${result.error || 'Unknown error'}. Please check if the storage bucket exists and policies are set up correctly.`);
         setIsUploading(false);
         return;
       }
 
-      // Get public URL
-      const { data: publicUrlData } = supabase.storage
-        .from('chat-attachments')
-        .getPublicUrl(storagePath);
+      const { storagePath, publicUrl } = result;
 
       setUploadProgress(100);
 
@@ -138,10 +133,10 @@ const ChatInput = ({
       setTimeout(() => {
         setAttachment({
           type,
-          data: publicUrlData.publicUrl, // Use public URL instead of base64
+          data: publicUrl,
           name: file.name,
           storagePath,
-          publicUrl: publicUrlData.publicUrl
+          publicUrl
         });
         setIsUploading(false);
         setUploadProgress(0);
