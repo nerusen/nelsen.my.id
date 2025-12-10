@@ -104,28 +104,46 @@ const ChatInput = ({
         return;
       }
 
-      // Upload via API route (server-side) to bypass CORS issues
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('userEmail', session.user.email);
+      // Upload directly to Supabase from client to bypass Vercel payload limits
+      const { createClient } = await import('@supabase/supabase-js');
 
-      setUploadProgress(30);
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        console.error('Upload error:', result);
-        alert(`Failed to upload file: ${result.error || 'Unknown error'}. Please check if the storage bucket exists and policies are set up correctly.`);
+      if (!supabaseUrl || !supabaseAnonKey) {
+        alert('Supabase configuration missing');
         setIsUploading(false);
         return;
       }
 
-      const { storagePath, publicUrl } = result;
+      const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const storagePath = `${session.user.email}/${fileName}`;
+
+      setUploadProgress(30);
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('chat-attachments')
+        .upload(storagePath, file, {
+          contentType: file.type,
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        alert(`Failed to upload file: ${uploadError.message}. Please check if the storage bucket exists and policies are set up correctly.`);
+        setIsUploading(false);
+        return;
+      }
+
+      setUploadProgress(70);
+
+      const { data: publicUrlData } = supabase.storage
+        .from('chat-attachments')
+        .getPublicUrl(storagePath);
 
       setUploadProgress(100);
 
@@ -133,10 +151,10 @@ const ChatInput = ({
       setTimeout(() => {
         setAttachment({
           type,
-          data: publicUrl,
+          data: publicUrlData.publicUrl,
           name: file.name,
           storagePath,
-          publicUrl
+          publicUrl: publicUrlData.publicUrl
         });
         setIsUploading(false);
         setUploadProgress(0);
