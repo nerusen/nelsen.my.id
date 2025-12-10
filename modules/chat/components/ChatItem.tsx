@@ -273,7 +273,7 @@ const ChatItem = ({
             className={clsx(
               "rounded-xl px-4 relative overflow-visible max-w-xs border",
               condition
-                ? "bg-[#15192F] dark:text-neutral-50 border-[#329BFF]/20 author-bubble-glow"
+                ? "bg-[#E5E7F7] dark:bg-[#15192F] text-black dark:text-neutral-50 border-[#329BFF]/20 author-bubble-glow"
                 : "bg-neutral-200 dark:bg-[#1E1E1E] dark:text-neutral-50 border-neutral-300 dark:border-neutral-600",
               isEditing && "blur-none",
             )}
@@ -346,7 +346,7 @@ const ChatItem = ({
                 </div>
                 {is_reply && (
                   <>
-                    <div className={clsx("text-xs text-neutral-600 dark:text-neutral-400 px-2 py-1 rounded-md mb-1 -mx-3", condition ? "bg-[#1A3273]" : "bg-neutral-300 dark:bg-[#121212]")}>
+                    <div className={clsx("text-xs text-neutral-600 dark:text-neutral-400 px-2 py-1 rounded-md mb-1 -mx-3", condition ? "bg-[#F7F8FF] dark:bg-[#1A3273]" : "bg-neutral-300 dark:bg-[#121212]")}>
                       membalas <span className="text-blue-500">@{reply_to}</span>
                     </div>
                     <div className="mt-1">
@@ -408,7 +408,7 @@ const ChatItem = ({
                             );
                           } else if (attachment.attachment_type === 'document') {
                             return (
-                              <div key={attachment.id} className={clsx("flex items-center gap-2 p-2 rounded-lg max-w-xs", condition ? "bg-[#21263F]" : "bg-neutral-100 dark:bg-neutral-800")}>
+                              <div key={attachment.id} className={clsx("flex items-center gap-2 p-2 rounded-lg max-w-xs", condition ? "bg-[#F7F8FF] dark:bg-[#21263F]" : "bg-neutral-100 dark:bg-neutral-800")}>
                                 <FileIcon size={20} className="flex-shrink-0 text-neutral-600 dark:text-neutral-400" />
                                 <div className="flex-1 min-w-0">
                                   <div className="text-xs font-medium truncate" title={attachment.file_name}>{truncateFileName(attachment.file_name, 18)}</div>
