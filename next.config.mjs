@@ -14,10 +14,13 @@ const nextConfig = {
   },
   experimental: {
     serverComponentsExternalPackages: ['@supabase/supabase-js'],
+    serverActions: {
+      bodySizeLimit: '50mb',
+    },
   },
   api: {
     bodyParser: {
-      sizeLimit: '10mb',
+      sizeLimit: '50mb',
     },
   },
 };
