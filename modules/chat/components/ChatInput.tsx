@@ -234,7 +234,7 @@ const ChatInput = ({
                         ></div>
                       </div>
                       <div className="text-xs text-neutral-500 dark:text-neutral-400">
-                        {uploadProgress.toFixed(0)}% • Calculating size...
+                        {uploadProgress.toFixed(0)}% • Wait, Upload...
                       </div>
                     </div>
                   </div>
