@@ -1,12 +1,17 @@
 "use client";
 
+
 import { useState } from "react";
 import Image from "next/image";
 import { formatDistanceToNow } from "date-fns";
-import { BsStar, BsStarFill, BsReply, BsPencil, BsTrash, BsPin, BsThreeDotsVertical } from "react-icons/bs";
+import { BsStar, BsStarFill, BsReply, BsPencil, BsTrash, BsPin } from "react-icons/bs";
+import { motion, AnimatePresence } from "framer-motion";
+
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 import clsx from "clsx";
+
+import Tooltip from "@/common/components/elements/Tooltip";
 
 import { Testimonial } from "@/common/types/testimoni";
 
@@ -29,7 +34,9 @@ const TestimonialBubble = ({
 }: TestimonialBubbleProps) => {
   const [isEditingReply, setIsEditingReply] = useState(false);
   const [replyText, setReplyText] = useState(testimonial.reply || "");
+
   const [showActions, setShowActions] = useState(false);
+  const [isBubbleTogglesVisible, setIsBubbleTogglesVisible] = useState(false);
   const [showReplyForm, setShowReplyForm] = useState(false);
   const { data: session } = useSession();
   const t = useTranslations("Testimonials");
@@ -63,10 +70,12 @@ const TestimonialBubble = ({
     ));
   };
 
+
   const handleBubbleClick = () => {
     if (canAuthorActions) {
       setShowReplyForm(!showReplyForm);
       setShowActions(false);
+      setIsBubbleTogglesVisible(!isBubbleTogglesVisible);
     }
   };
 
@@ -232,61 +241,100 @@ const TestimonialBubble = ({
           )}
         </div>
 
-        {/* Action Buttons - Toggle style like chat room */}
-        {canAuthorActions && (
-          <div className="flex items-center gap-2 mt-2 ml-4">
-            {/* Three dots menu */}
-            <div className="relative">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowActions(!showActions);
-                }}
-                className="p-1 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
-              >
-                <BsThreeDotsVertical size={16} className="text-neutral-500 dark:text-neutral-400" />
-              </button>
-              
-              {/* Dropdown menu */}
-              {showActions && (
-                <div className="absolute top-8 left-0 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-md shadow-lg py-1 z-10 min-w-[120px]">
-                  <button
+
+        {/* Action Buttons - Floating style like chat room */}
+        <AnimatePresence>
+          {isBubbleTogglesVisible && canAuthorActions && (
+            <motion.div
+              initial={{ opacity: 0, y: -10, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.9 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="mt-2 flex justify-start"
+            >
+              <div className="bg-[#212121] rounded-full px-1 sm:px-2 py-1 flex items-center gap-1 shadow-lg z-5 min-w-max">
+
+                <Tooltip title="Reply">
+                  <motion.button
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.1, delay: 0 }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onReply?.(testimonial.id, replyText);
+                      setIsBubbleTogglesVisible(false);
+                      setShowReplyForm(true);
+                      setReplyText("");
+                    }}
+                    className="bg-[#121212] rounded-full p-1.5 sm:p-2 text-white hover:bg-[#1a1a1a] transition duration-100 active:scale-90 flex items-center justify-center"
+                  >
+                    <BsReply size={14} />
+                  </motion.button>
+                </Tooltip>
+
+
+                {testimonial.reply && (
+                  <Tooltip title="Edit Reply">
+                    <motion.button
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.1, delay: 0.05 }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsEditingReply(!isEditingReply);
+                        setIsBubbleTogglesVisible(false);
+                      }}
+                      className="bg-[#121212] rounded-full p-1.5 sm:p-2 text-white hover:bg-[#1a1a1a] transition duration-100 active:scale-90 flex items-center justify-center"
+                    >
+                      <BsPencil size={14} />
+                    </motion.button>
+                  </Tooltip>
+                )}
+
+
+                <Tooltip title={testimonial.isPinned ? "Unpin Message" : "Pin Message"}>
+                  <motion.button
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.1, delay: 0.1 }}
                     onClick={(e) => {
                       e.stopPropagation();
                       onPin?.(testimonial.id);
-                      setShowActions(false);
+                      setIsBubbleTogglesVisible(false);
                     }}
                     className={clsx(
-                      "w-full px-3 py-2 text-left text-xs flex items-center gap-2 hover:bg-neutral-100 dark:hover:bg-neutral-700",
-                      testimonial.isPinned
-                        ? "text-yellow-700 dark:text-yellow-300"
-                        : "text-neutral-700 dark:text-neutral-300"
+                      "bg-[#121212] rounded-full p-1.5 sm:p-2 text-white hover:bg-[#1a1a1a] transition duration-100 active:scale-90 flex items-center justify-center",
+                      testimonial.isPinned && "bg-yellow-600 hover:bg-yellow-500"
                     )}
                   >
-                    <BsPin size={12} />
-                    {testimonial.isPinned ? t("unpin") : t("pin")}
-                  </button>
-                  <button
+                    <BsPin size={14} />
+                  </motion.button>
+                </Tooltip>
+
+                <Tooltip title="Delete Message">
+                  <motion.button
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.1, delay: 0.15 }}
                     onClick={(e) => {
                       e.stopPropagation();
                       onDelete?.(testimonial.id);
-                      setShowActions(false);
+                      setIsBubbleTogglesVisible(false);
                     }}
-                    className="w-full px-3 py-2 text-left text-xs text-red-600 dark:text-red-400 hover:bg-neutral-100 dark:hover:bg-neutral-700 flex items-center gap-2"
+                    className="bg-[#121212] rounded-full p-1.5 sm:p-2 text-white hover:bg-red-600 transition duration-100 active:scale-90 flex items-center justify-center"
                   >
-                    <BsTrash size={12} />
-                    {t("delete")}
-                  </button>
-                </div>
-              )}
-            </div>
-            
-            {canEditOwn && (
-              <span className="text-xs text-neutral-500 dark:text-neutral-400">
-                {t("your_testimonial")}
-              </span>
-            )}
-          </div>
+                    <BsTrash size={14} />
+                  </motion.button>
+                </Tooltip>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {canEditOwn && (
+          <span className="text-xs text-neutral-500 dark:text-neutral-400 mt-2 block">
+            {t("your_testimonial")}
+          </span>
         )}
       </div>
     </div>
