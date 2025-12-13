@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
-import { supabase } from "@/common/libs/supabase";
+import { createClient } from "@/common/utils/server";
+import { authOptions } from "@/common/libs/next-auth";
 import { CreateTestimonialRequest } from "@/common/types/testimoni";
 
 export async function GET() {
