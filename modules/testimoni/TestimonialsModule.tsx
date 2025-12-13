@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
+import { motion, AnimatePresence } from "framer-motion";
 
 import Container from "@/common/components/elements/Container";
-import Breakline from "@/common/components/elements/Breakline";
-import RatingModal from "./components/RatingModal";
 import TestimonialBubble from "./components/TestimonialBubble";
+import TestimonialInput from "./components/TestimonialInput";
 
 import { Testimonial } from "@/common/types/testimoni";
 
@@ -15,14 +15,23 @@ const TestimonialsModule = () => {
   const t = useTranslations("TestimoniPage");
   const { data: session } = useSession();
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const isAuthor = session?.user?.email === process.env.NEXT_PUBLIC_AUTHOR_EMAIL;
 
   useEffect(() => {
     fetchTestimonials();
   }, []);
+
+  useEffect(() => {
+    // Auto scroll to bottom on initial load if there are enough messages
+    if (testimonials.length > 3) {
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 500);
+    }
+  }, [testimonials]);
 
   const fetchTestimonials = async () => {
     try {
@@ -34,14 +43,6 @@ const TestimonialsModule = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleAddTestimonial = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
   };
 
   const handleSubmitTestimonial = async (rating: number, message: string) => {
@@ -56,7 +57,10 @@ const TestimonialsModule = () => {
 
       if (response.ok) {
         await fetchTestimonials();
-        setIsModalOpen(false);
+        // Scroll to bottom after new message
+        setTimeout(() => {
+          messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        }, 100);
       }
     } catch (error) {
       console.error("Failed to submit testimonial:", error);
@@ -122,9 +126,9 @@ const TestimonialsModule = () => {
   }
 
   return (
-    <>
+    <Container className="max-w-4xl mx-auto py-6">
       {/* Header Section */}
-      <section className="text-center mb-8">
+      <section className="text-center mb-6">
         <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100 mb-4">
           {t("title")}
         </h1>
@@ -133,47 +137,46 @@ const TestimonialsModule = () => {
         </p>
       </section>
 
-      <Breakline className="my-8" />
-
-      {/* Testimonials Section */}
-      <section className="mb-8">
-        <div className="mb-6 flex justify-center">
-          <button
-            onClick={handleAddTestimonial}
-            className="rounded-lg bg-blue-600 px-6 py-2 text-white hover:bg-blue-700 transition-colors"
-          >
-            {t("add_testimonial")}
-          </button>
-        </div>
-
-        <div className="space-y-6">
+      {/* Chat-like Container */}
+      <div className="bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-700 h-[600px] flex flex-col">
+        {/* Messages Area */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {testimonials.length > 0 ? (
             testimonials.map((testimonial) => (
-              <TestimonialBubble
+              <motion.div
                 key={testimonial.id}
-                testimonial={testimonial}
-                isAuthor={isAuthor}
-                onReply={handleReply}
-                onDelete={handleDelete}
-                onPin={handlePin}
-              />
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <TestimonialBubble
+                  testimonial={testimonial}
+                  isAuthor={isAuthor}
+                  onReply={handleReply}
+                  onDelete={handleDelete}
+                  onPin={handlePin}
+                />
+              </motion.div>
             ))
           ) : (
-            <div className="text-center py-12">
+            <div className="flex items-center justify-center h-full">
               <p className="text-neutral-500 dark:text-neutral-400">
                 {t("no_testimonials")}
               </p>
             </div>
           )}
+          <div ref={messagesEndRef} />
         </div>
-      </section>
 
-      <RatingModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        onSubmit={handleSubmitTestimonial}
-      />
-    </>
+        {/* Input Area - Sticky */}
+        <div className="border-t border-neutral-200 dark:border-neutral-700">
+          <TestimonialInput
+            onSubmit={handleSubmitTestimonial}
+            placeholder="Write your testimonial..."
+          />
+        </div>
+      </div>
+    </Container>
   );
 };
 
