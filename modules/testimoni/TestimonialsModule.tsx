@@ -132,15 +132,16 @@ const TestimonialsModule = () => {
         <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100 mb-4">
           {t("title")}
         </h1>
-        <p className="text-neutral-600 dark:text-neutral-400 max-w-2xl mx-auto">
+        <p className="text-neutral-600 dark:text-neutral-400 max-w-2xl mx-auto mb-4">
           {t("description")}
         </p>
+        <hr className="border-neutral-300 dark:border-neutral-700" />
       </section>
 
       {/* Chat-like Container */}
-      <div className="bg-white dark:bg-neutral-900 rounded-lg border border-neutral-200 dark:border-neutral-700 h-[600px] flex flex-col">
+      <div className="bg-neutral-900 rounded-lg border border-neutral-700 h-[600px] flex flex-col">
         {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {testimonials.length > 0 ? (
             testimonials.map((testimonial) => (
               <motion.div
@@ -168,13 +169,11 @@ const TestimonialsModule = () => {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input Area - Sticky */}
-        <div className="border-t border-neutral-200 dark:border-neutral-700">
-          <TestimonialInput
-            onSubmit={handleSubmitTestimonial}
-            placeholder="Write your testimonial..."
-          />
-        </div>
+        {/* Input Area */}
+        <TestimonialInput
+          onSubmit={handleSubmitTestimonial}
+          placeholder="Write your testimonial..."
+        />
       </div>
     </Container>
   );
