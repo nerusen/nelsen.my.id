@@ -146,7 +146,6 @@ export default function TestimonialsModule() {
             key={testimonial.id}
             testimonial={testimonial}
             isAuthor={isAuthor}
-            currentUserId={session?.user?.id}
             onReply={handleReply}
             onDelete={handleDelete}
             onPin={handlePin}
