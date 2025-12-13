@@ -309,9 +309,24 @@
   },
   "TestimoniPage": {
     "title": "Testimonials",
-    "description": "Share your feedback and see what others are saying",
+    "description": "Read what others say about my work and services.",
     "loading": "Loading testimonials...",
-    "add_testimonial": "Add Testimonial"
+    "add_testimonial": "Add Testimonial",
+    "modal_title": "Share Your Feedback",
+    "rating_label": "Rating",
+    "message_label": "Message",
+    "message_placeholder": "Share your thoughts...",
+    "cancel": "Cancel",
+    "send": "Send",
+    "reply": "Reply",
+    "edit_reply": "Edit Reply",
+    "delete": "Delete",
+    "pin": "Pin",
+    "edit": "Edit",
+    "save": "Save",
+    "reply_placeholder": "Write your reply...",
+    "already_rated": "You have already submitted a testimonial",
+    "login_required": "Please login to share your testimonial"
   },
   "TestimonialsPage": {
     "title": "Testimonials",
