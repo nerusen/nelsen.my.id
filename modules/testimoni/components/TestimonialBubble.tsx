@@ -95,7 +95,13 @@ const TestimonialBubble = ({
                 {renderStars(testimonial.rating)}
               </div>
               <span className="text-xs text-neutral-500 dark:text-neutral-400">
-                {formatDistanceToNow(new Date(testimonial.createdAt), { addSuffix: true })}
+                {(() => {
+                  try {
+                    return formatDistanceToNow(new Date(testimonial.createdAt), { addSuffix: true });
+                  } catch {
+                    return "Invalid date";
+                  }
+                })()}
               </span>
             </div>
           </div>
