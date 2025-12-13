@@ -62,20 +62,17 @@ export default function TestimonialInput({
   return (
     <div className="border-t border-neutral-300 py-4 dark:border-neutral-700 px-4">
       <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           {/* Rating Button */}
-          <div className="relative">
+          <div className="relative flex-shrink-0">
             <button
               ref={ratingButtonRef}
               type="button"
               onClick={() => setShowRatingDropup(!showRatingDropup)}
-              className="flex items-center justify-center px-3 py-2 bg-neutral-800 border border-neutral-600 rounded-lg text-neutral-200 hover:bg-neutral-700 transition-colors"
+              className="flex items-center justify-center px-3 py-2 bg-neutral-800 border border-neutral-600 rounded-lg text-neutral-200 hover:bg-neutral-700 transition-colors w-[100px]"
             >
-              {rating > 0 ? (
-                <BsStarFill size={18} />
-              ) : (
-                <BsStar size={18} />
-              )}
+              <BsStarFill size={16} className={rating > 0 ? "text-yellow-400" : "text-neutral-400"} />
+              <span className="ml-1 text-sm">Rating</span>
             </button>
 
             {/* Rating Dropup */}
@@ -86,7 +83,7 @@ export default function TestimonialInput({
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 10, scale: 0.9 }}
                   transition={{ duration: 0.2 }}
-                  className="absolute bottom-12 left-0 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg shadow-lg py-2 px-1 min-w-[200px]"
+                  className="absolute bottom-12 left-0 bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-lg shadow-lg py-2 px-3 min-w-[120px]"
                 >
                   <div className="space-y-1">
                     {[1, 2, 3, 4, 5].map((star) => (
@@ -96,30 +93,18 @@ export default function TestimonialInput({
                         onClick={() => handleRatingSelect(star)}
                         onMouseEnter={() => setHoverRating(star)}
                         onMouseLeave={() => setHoverRating(0)}
-                        className="w-full flex items-center gap-3 px-3 py-2 text-sm hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-md transition-colors"
+                        className="w-full flex items-center justify-center gap-2 px-3 py-2 text-sm hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-md transition-colors"
                       >
-                        <div className="flex items-center gap-1">
-                          {[1, 2, 3, 4, 5].map((s) => (
-                            <BsStarFill
-                              key={s}
-                              size={14}
-                              className={
-                                s <= (hoverRating || star)
-                                  ? "text-yellow-400"
-                                  : "text-neutral-300 dark:text-neutral-600"
-                              }
-                            />
-                          ))}
-                        </div>
+                        <BsStarFill
+                          size={16}
+                          className={
+                            star <= (hoverRating || star)
+                              ? "text-yellow-400"
+                              : "text-neutral-300 dark:text-neutral-600"
+                          }
+                        />
                         <span className="font-medium text-neutral-700 dark:text-neutral-300">
                           {star}
-                        </span>
-                        <span className="text-xs text-neutral-500 dark:text-neutral-400">
-                          {star === 1 && "Poor"}
-                          {star === 2 && "Fair"}
-                          {star === 3 && "Good"}
-                          {star === 4 && "Very Good"}
-                          {star === 5 && "Excellent"}
                         </span>
                       </button>
                     ))}
