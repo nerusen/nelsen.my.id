@@ -5,6 +5,7 @@ import { createClient } from "@/common/utils/server";
 import { authOptions } from "@/common/libs/next-auth";
 import { CreateTestimonialRequest } from "@/common/types/testimoni";
 
+
 export async function GET() {
   const supabase = createClient();
   try {
@@ -22,7 +23,21 @@ export async function GET() {
       );
     }
 
-    return NextResponse.json(data);
+    // Map database fields to frontend format
+    const mappedData = data?.map((testimonial: any) => ({
+      id: testimonial.id,
+      userId: testimonial.user_email,
+      username: testimonial.username,
+      userImage: testimonial.user_image,
+      rating: testimonial.rating,
+      message: testimonial.message,
+      reply: testimonial.reply,
+      isPinned: testimonial.is_pinned,
+      createdAt: testimonial.created_at,
+      updatedAt: testimonial.updated_at,
+    }));
+
+    return NextResponse.json(mappedData);
   } catch (error) {
     console.error("API error:", error);
     return NextResponse.json(
