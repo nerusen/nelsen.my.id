@@ -4,6 +4,7 @@ import {
   BiCollection as ProjectIcon,
   BiCategory as DashboardIcon,
   BiBook as ContactIcon,
+  BiStar as TestimoniIcon,
 } from "react-icons/bi";
 import { PiChatTeardropDotsBold as ChatRoomIcon } from "react-icons/pi";
 import { PiCertificate as AchievementIcon, PiGameController as StrikeGameIcon } from "react-icons/pi";
@@ -86,6 +87,14 @@ export const MENU_ITEMS: MenuItemProps[] = [
     isShow: true,
     isExternal: false,
     eventName: "Pages: Contact",
+  },
+  {
+    title: "Testimoni",
+    href: "/testimoni",
+    icon: <TestimoniIcon size={iconSize} />,
+    isShow: true,
+    isExternal: false,
+    eventName: "Pages: Testimoni",
   },
 
   {
