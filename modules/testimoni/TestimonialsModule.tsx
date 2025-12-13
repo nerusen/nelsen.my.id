@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 
-import Container from "@/common/components/layouts/Container";
+import Container from "@/common/components/elements/Container";
 import RatingModal from "./components/RatingModal";
 import TestimonialBubble from "./components/TestimonialBubble";
 
