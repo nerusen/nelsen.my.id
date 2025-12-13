@@ -15,7 +15,7 @@ interface TestimonialBubbleProps {
   onReply?: (testimonialId: string, reply: string) => void;
   onEditReply?: (testimonialId: string, reply: string) => void;
   onDelete?: (testimonialId: string) => void;
-  onPin?: (testimonialId: string, pinned: boolean) => void;
+  onPin?: (testimonialId: string) => void;
   isAuthor?: boolean;
 }
 
@@ -191,16 +191,16 @@ const TestimonialBubble = ({
           {canAuthorActions && (
             <>
               <button
-                onClick={() => onPin?.(testimonial.id, !testimonial.is_pinned)}
+                onClick={() => onPin?.(testimonial.id)}
                 className={clsx(
                   "text-xs px-2 py-1 rounded-md flex items-center gap-1",
-                  testimonial.is_pinned
+                  testimonial.isPinned
                     ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-200 dark:bg-yellow-900 dark:text-yellow-300"
                     : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200 dark:bg-neutral-700 dark:text-neutral-400"
                 )}
               >
                 <BsPin size={12} />
-                {testimonial.is_pinned ? t("unpin") : t("pin")}
+                {testimonial.isPinned ? t("unpin") : t("pin")}
               </button>
               <button
                 onClick={() => onDelete?.(testimonial.id)}
