@@ -74,12 +74,13 @@ const TestimonialBubble = ({
     ));
   };
 
+
   const handleBubbleClick = (e: React.MouseEvent) => {
     // Don't toggle if clicking on interactive elements
     if (e.target instanceof HTMLButtonElement || 
         e.target instanceof HTMLTextAreaElement ||
-        e.target.closest('.bubble-actions') ||
-        e.target.closest('.reply-form')) {
+        (e.target as Element).closest('.bubble-actions') ||
+        (e.target as Element).closest('.reply-form')) {
       return;
     }
     
