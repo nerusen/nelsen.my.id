@@ -309,7 +309,9 @@
   },
   "TestimoniPage": {
     "title": "Testimonials",
-    "description": "Share your feedback and see what others are saying"
+    "description": "Share your feedback and see what others are saying",
+    "loading": "Loading testimonials...",
+    "add_testimonial": "Add Testimonial"
   },
   "TestimonialsPage": {
     "title": "Testimonials",
