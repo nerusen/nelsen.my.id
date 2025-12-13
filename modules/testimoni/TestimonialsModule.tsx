@@ -5,12 +5,13 @@ import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 
 import Container from "@/common/components/elements/Container";
+import Breakline from "@/common/components/elements/Breakline";
 import RatingModal from "./components/RatingModal";
 import TestimonialBubble from "./components/TestimonialBubble";
 
 import { Testimonial } from "@/common/types/testimoni";
 
-export default function TestimonialsModule() {
+const TestimonialsModule = () => {
   const t = useTranslations("TestimoniPage");
   const { data: session } = useSession();
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
@@ -121,43 +122,60 @@ export default function TestimonialsModule() {
   }
 
   return (
-    <Container className="py-8">
-      <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100">
+    <>
+      {/* Header Section */}
+      <section className="text-center mb-8">
+        <h1 className="text-3xl font-bold text-neutral-900 dark:text-neutral-100 mb-4">
           {t("title")}
         </h1>
-        <p className="mt-2 text-neutral-600 dark:text-neutral-400">
+        <p className="text-neutral-600 dark:text-neutral-400 max-w-2xl mx-auto">
           {t("description")}
         </p>
-      </div>
+      </section>
 
-      <div className="mb-6 flex justify-center">
-        <button
-          onClick={handleAddTestimonial}
-          className="rounded-lg bg-blue-600 px-6 py-2 text-white hover:bg-blue-700"
-        >
-          {t("add_testimonial")}
-        </button>
-      </div>
+      <Breakline className="my-8" />
 
-      <div className="space-y-4">
-        {testimonials.map((testimonial) => (
-          <TestimonialBubble
-            key={testimonial.id}
-            testimonial={testimonial}
-            isAuthor={isAuthor}
-            onReply={handleReply}
-            onDelete={handleDelete}
-            onPin={handlePin}
-          />
-        ))}
-      </div>
+      {/* Testimonials Section */}
+      <section className="mb-8">
+        <div className="mb-6 flex justify-center">
+          <button
+            onClick={handleAddTestimonial}
+            className="rounded-lg bg-blue-600 px-6 py-2 text-white hover:bg-blue-700 transition-colors"
+          >
+            {t("add_testimonial")}
+          </button>
+        </div>
+
+        <div className="space-y-6">
+          {testimonials.length > 0 ? (
+            testimonials.map((testimonial) => (
+              <TestimonialBubble
+                key={testimonial.id}
+                testimonial={testimonial}
+                isAuthor={isAuthor}
+                onReply={handleReply}
+                onDelete={handleDelete}
+                onPin={handlePin}
+              />
+            ))
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-neutral-500 dark:text-neutral-400">
+                {t("no_testimonials")}
+              </p>
+            </div>
+          )}
+        </div>
+      </section>
 
       <RatingModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         onSubmit={handleSubmitTestimonial}
       />
-    </Container>
+    </>
   );
-}
+};
+
+export default TestimonialsModule;
+
