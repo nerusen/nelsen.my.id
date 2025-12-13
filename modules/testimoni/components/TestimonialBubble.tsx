@@ -94,12 +94,22 @@ const TestimonialBubble = ({
               <div className="flex items-center gap-1">
                 {renderStars(testimonial.rating)}
               </div>
+
               <span className="text-xs text-neutral-500 dark:text-neutral-400">
                 {(() => {
                   try {
-                    return formatDistanceToNow(new Date(testimonial.createdAt), { addSuffix: true });
+                    // Ensure we have a valid date string
+                    const dateString = testimonial.createdAt;
+                    if (!dateString || dateString === "Invalid Date") {
+                      return "Recently";
+                    }
+                    const date = new Date(dateString);
+                    if (isNaN(date.getTime())) {
+                      return "Recently";
+                    }
+                    return formatDistanceToNow(date, { addSuffix: true });
                   } catch {
-                    return "Invalid date";
+                    return "Recently";
                   }
                 })()}
               </span>
