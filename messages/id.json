@@ -242,6 +242,7 @@
     "Chat Room": "Ruang Obrolan",
     "Music Room": "Ruang Musik",
     "Contact": "Kontak",
+    "Testimoni": "Testimoni",
     "Smart Talk": "Smart Talk"
   },
   "NotFoundPage": {
@@ -304,5 +305,26 @@
     "refresh_description": "Perbarui data strike saat ini dan peringkat papan peringkat",
     "reset_title": "Reset Kemajuan",
     "reset_description": "Reset semua kemajuan permainan strike Anda. Tindakan ini tidak dapat dibatalkan"
+  },
+  "TestimoniPage": {
+    "title": "Testimoni",
+    "description": "Baca apa yang dikatakan orang lain tentang pekerjaan dan layanan saya.",
+    "loading": "Memuat testimoni...",
+    "add_testimonial": "Tambah Testimoni",
+    "modal_title": "Bagikan Masukan Anda",
+    "rating_label": "Rating",
+    "message_label": "Pesan",
+    "message_placeholder": "Bagikan pendapat Anda...",
+    "cancel": "Batal",
+    "send": "Kirim",
+    "reply": "Balas",
+    "edit_reply": "Edit Balasan",
+    "delete": "Hapus",
+    "pin": "Pin",
+    "edit": "Edit",
+    "save": "Simpan",
+    "reply_placeholder": "Tulis balasan...",
+    "already_rated": "Anda sudah mengirimkan testimoni",
+    "login_required": "Silakan login untuk membagikan testimoni Anda"
   }
 }
