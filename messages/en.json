@@ -307,6 +307,10 @@
     "reset_title": "Reset Progress",
     "reset_description": "Reset all your strike game progress. This action cannot be undone"
   },
+  "TestimoniPage": {
+    "title": "Testimonials",
+    "description": "Share your feedback and see what others are saying"
+  },
   "TestimonialsPage": {
     "title": "Testimonials",
     "description": "Share your feedback and see what others are saying",
