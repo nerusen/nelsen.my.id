@@ -1,7 +1,8 @@
 "use client";
 
 
-import { useState } from "react";
+
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { formatDistanceToNow } from "date-fns";
 import { BsStar, BsStarFill, BsReply, BsPencil, BsTrash, BsPin } from "react-icons/bs";
@@ -38,12 +39,33 @@ const TestimonialBubble = ({
   const [showActions, setShowActions] = useState(false);
   const [isBubbleTogglesVisible, setIsBubbleTogglesVisible] = useState(false);
   const [showReplyForm, setShowReplyForm] = useState(false);
+
   const { data: session } = useSession();
   const t = useTranslations("Testimonials");
+  const bubbleRef = useRef<HTMLDivElement>(null);
 
   const isOwnTestimonial = session?.user?.email === testimonial.userId;
   const canEditOwn = isOwnTestimonial && !isAuthor;
   const canAuthorActions = isAuthor;
+
+  // Handle click outside to close forms
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (bubbleRef.current && !bubbleRef.current.contains(event.target as Node)) {
+        setShowReplyForm(false);
+        setIsEditingReply(false);
+        setIsBubbleTogglesVisible(false);
+        setReplyText(testimonial.reply || "");
+      }
+    };
+
+    if (showReplyForm || isEditingReply || isBubbleTogglesVisible) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [showReplyForm, isEditingReply, isBubbleTogglesVisible, testimonial.reply]);
 
   const handleReply = () => {
     if (replyText.trim()) {
@@ -71,19 +93,36 @@ const TestimonialBubble = ({
   };
 
 
-  const handleBubbleClick = () => {
+
+
+  const handleBubbleClick = (e: React.MouseEvent) => {
     if (canAuthorActions) {
-      setShowReplyForm(!showReplyForm);
-      setShowActions(false);
+      const target = e.target as HTMLElement;
+      // Prevent toggle if clicking on form or action buttons
+      if (target.closest('.reply-form') || target.closest('.bubble-actions')) {
+        return;
+      }
+      
       setIsBubbleTogglesVisible(!isBubbleTogglesVisible);
+      setShowActions(false);
     }
   };
 
+  const handleReplyButtonClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowReplyForm(true);
+    setIsBubbleTogglesVisible(false);
+  };
+
+
   return (
-    <div className={clsx(
-      "flex gap-3 mb-4",
-      testimonial.isPinned && "bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg border-l-4 border-yellow-400"
-    )}>
+    <div 
+      ref={bubbleRef}
+      className={clsx(
+        "flex gap-3 mb-4",
+        testimonial.isPinned && "bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg border-l-4 border-yellow-400"
+      )}
+    >
       {/* User Avatar */}
       <div className="flex-shrink-0">
         <Image
@@ -165,14 +204,17 @@ const TestimonialBubble = ({
                   </button>
                 )}
               </div>
+
               {isEditingReply && canAuthorActions ? (
-                <div className="space-y-2">
+                <div className="reply-form space-y-2">
                   <textarea
                     value={replyText}
                     onChange={(e) => setReplyText(e.target.value)}
+                    onClick={(e) => e.stopPropagation()}
                     className="w-full p-2 text-sm border rounded-md resize-none dark:bg-neutral-700 dark:border-neutral-600"
                     rows={3}
                     placeholder={t("reply_placeholder")}
+                    autoFocus
                   />
                   <div className="flex gap-2">
                     <button
@@ -204,16 +246,19 @@ const TestimonialBubble = ({
             </div>
           )}
 
+
           {/* Reply Form - Toggle based on showReplyForm state */}
           {showReplyForm && canAuthorActions && !testimonial.reply && (
-            <div className="border-t border-neutral-200 dark:border-neutral-600 pt-3 mt-3">
+            <div className="reply-form border-t border-neutral-200 dark:border-neutral-600 pt-3 mt-3">
               <div className="space-y-2">
                 <textarea
                   value={replyText}
                   onChange={(e) => setReplyText(e.target.value)}
+                  onClick={(e) => e.stopPropagation()}
                   className="w-full p-2 text-sm border rounded-md resize-none dark:bg-neutral-700 dark:border-neutral-600"
                   rows={3}
                   placeholder={t("reply_placeholder")}
+                  autoFocus
                 />
                 <div className="flex gap-2">
                   <button
@@ -242,6 +287,7 @@ const TestimonialBubble = ({
         </div>
 
 
+
         {/* Action Buttons - Floating style like chat room */}
         <AnimatePresence>
           {isBubbleTogglesVisible && canAuthorActions && (
@@ -252,20 +298,15 @@ const TestimonialBubble = ({
               transition={{ duration: 0.3, ease: "easeOut" }}
               className="mt-2 flex justify-start"
             >
-              <div className="bg-[#212121] rounded-full px-1 sm:px-2 py-1 flex items-center gap-1 shadow-lg z-5 min-w-max">
+              <div className="bubble-actions bg-[#212121] rounded-full px-1 sm:px-2 py-1 flex items-center gap-1 shadow-lg z-5 min-w-max">
 
                 <Tooltip title="Reply">
+
                   <motion.button
                     initial={{ opacity: 0, scale: 0 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ duration: 0.1, delay: 0 }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onReply?.(testimonial.id, replyText);
-                      setIsBubbleTogglesVisible(false);
-                      setShowReplyForm(true);
-                      setReplyText("");
-                    }}
+                    onClick={handleReplyButtonClick}
                     className="bg-[#121212] rounded-full p-1.5 sm:p-2 text-white hover:bg-[#1a1a1a] transition duration-100 active:scale-90 flex items-center justify-center"
                   >
                     <BsReply size={14} />
