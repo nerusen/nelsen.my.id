@@ -69,7 +69,7 @@ export default function TestimonialInput({
               ref={ratingButtonRef}
               type="button"
               onClick={() => setShowRatingDropup(!showRatingDropup)}
-              className="flex items-center justify-center px-3 py-2 bg-neutral-800 border border-neutral-600 rounded-lg text-neutral-200 hover:bg-neutral-700 transition-colors w-[100px]"
+              className="flex items-center justify-center px-3 py-3 bg-neutral-800 border border-neutral-600 rounded-lg text-neutral-200 hover:bg-neutral-700 transition-colors w-[100px] h-[50px]"
             >
               <BsStarFill size={16} className={rating > 0 ? "text-yellow-400" : "text-neutral-400"} />
               <span className="ml-1 text-sm">Rating</span>
@@ -122,7 +122,7 @@ export default function TestimonialInput({
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder={placeholder}
-              className="w-full px-4 py-3 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 min-h-[50px] max-h-[120px]"
+              className="w-full px-4 py-3 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 h-[50px]"
               rows={1}
             />
           </div>
@@ -131,7 +131,7 @@ export default function TestimonialInput({
           <button
             type="submit"
             disabled={rating === 0 || !message.trim()}
-            className={`rounded-md p-3 text-white transition duration-100 active:scale-90 ${
+            className={`rounded-md px-3 py-3 text-white transition duration-100 active:scale-90 w-[50px] h-[50px] flex items-center justify-center ${
               rating > 0 && message.trim()
                 ? "bg-emerald-500 hover:bg-emerald-400 dark:bg-emerald-600 dark:hover:bg-emerald-500"
                 : "cursor-not-allowed bg-neutral-800 border border-neutral-600 active:scale-100"
