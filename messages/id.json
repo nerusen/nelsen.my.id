@@ -333,6 +333,7 @@
     "edit_reply_success": "Balasan berhasil diperbarui",
     "edit_reply_error": "Gagal memperbarui balasan"
   },
+
   "Testimonials": {
     "author_reply": "Balasan Penulis",
     "reply": "Balas",
@@ -344,7 +345,8 @@
     "unpin": "Lepas",
     "your_testimonial": "Testimoni Anda",
     "loading": "Memuat...",
-    "error": "Terjadi kesalahan"
+    "error": "Terjadi kesalahan",
+    "cancel": "Batal"
   },
   "TestimoniPage": {
     "title": "Testimoni",

@@ -355,6 +355,7 @@
     "edit_reply_success": "Reply updated successfully",
     "edit_reply_error": "Failed to update reply"
   },
+
   "Testimonials": {
     "author_reply": "Author Reply",
     "reply": "Reply",
@@ -366,6 +367,7 @@
     "unpin": "Unpin",
     "your_testimonial": "Your testimonial",
     "loading": "Loading...",
-    "error": "Something went wrong"
+    "error": "Something went wrong",
+    "cancel": "Cancel"
   }
 }
