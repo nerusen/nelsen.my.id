@@ -147,7 +147,7 @@ const TestimonialBubble = ({
                   <BsPin className="text-yellow-500" size={14} />
                 )}
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col items-end gap-1">
                 <div className="flex items-center gap-1">
                   {renderStars(testimonial.rating)}
                 </div>
