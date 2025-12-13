@@ -167,37 +167,40 @@ const TestimonialsModule = () => {
       </AnimatePresence>
 
       {/* Controls */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setViewMode(viewMode === 'chat' ? 'list' : 'chat')}
-            className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
+            className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm ${
               viewMode === 'chat'
                 ? 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200'
                 : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400'
             }`}
           >
             {viewMode === 'chat' ? <BsChatDots size={16} /> : <BsList size={16} />}
-            {viewMode === 'chat' ? 'Chat View' : 'List View'}
+            <span className="hidden sm:inline">{viewMode === 'chat' ? 'Chat View' : 'List View'}</span>
+            <span className="sm:hidden">{viewMode === 'chat' ? 'Chat' : 'List'}</span>
           </button>
           <button
             onClick={() => setShowPinnedOnly(!showPinnedOnly)}
-            className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
+            className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm ${
               showPinnedOnly
                 ? 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200'
                 : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400'
             }`}
           >
             <BsPin size={16} />
-            {showPinnedOnly ? 'Show All' : 'Show Pinned'}
+            <span className="hidden sm:inline">{showPinnedOnly ? 'Show All' : 'Show Pinned'}</span>
+            <span className="sm:hidden">{showPinnedOnly ? 'All' : 'Pinned'}</span>
           </button>
         </div>
         <button
           onClick={() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })}
-          className="flex items-center gap-2 px-3 py-2 bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
+          className="flex items-center gap-2 px-3 py-2 bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors text-sm"
         >
           <BsChevronDown size={16} />
-          Scroll to Bottom
+          <span className="hidden sm:inline">Scroll to Bottom</span>
+          <span className="sm:hidden">Scroll</span>
         </button>
       </div>
 
