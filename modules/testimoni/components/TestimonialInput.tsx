@@ -62,7 +62,7 @@ export default function TestimonialInput({
   return (
     <div className="border-t border-neutral-300 py-4 dark:border-neutral-700 px-4">
       <form onSubmit={handleSubmit} className="max-w-4xl mx-auto">
-        <div className="flex items-center gap-3">
+        <div className="flex items-end gap-3">
           {/* Rating Button */}
           <div className="relative flex-shrink-0">
             <button
@@ -122,7 +122,7 @@ export default function TestimonialInput({
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder={placeholder}
-              className="w-full px-3 py-3 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 h-[50px]"
+              className="w-full px-3 py-3 bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 min-h-[50px]"
               rows={1}
             />
           </div>

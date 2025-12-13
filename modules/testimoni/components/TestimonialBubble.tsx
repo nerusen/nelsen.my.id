@@ -147,34 +147,36 @@ const TestimonialBubble = ({
                   <BsPin className="text-yellow-500" size={14} />
                 )}
               </div>
-              <div className="flex flex-col items-end gap-1">
-                <div className="flex items-center gap-1">
-                  {renderStars(testimonial.rating)}
-                </div>
-                <span className="text-xs text-neutral-500 dark:text-neutral-400">
-                  {(() => {
-                    try {
-                      const dateString = testimonial.createdAt;
-                      if (!dateString || dateString === "Invalid Date") {
-                        return "Recently";
-                      }
-                      const date = new Date(dateString);
-                      if (isNaN(date.getTime())) {
-                        return "Recently";
-                      }
-                      return formatDistanceToNow(date, { addSuffix: true });
-                    } catch {
-                      return "Recently";
-                    }
-                  })()}
-                </span>
+              <div className="flex items-center gap-1">
+                {renderStars(testimonial.rating)}
               </div>
             </div>
 
             {/* Message */}
-            <p className="text-sm text-neutral-700 dark:text-neutral-300 mb-3">
+            <p className="text-sm text-neutral-700 dark:text-neutral-300 mb-2">
               {testimonial.message}
             </p>
+
+            {/* Date below message */}
+            <div className="flex justify-end">
+              <span className="text-xs text-neutral-500 dark:text-neutral-400">
+                {(() => {
+                  try {
+                    const dateString = testimonial.createdAt;
+                    if (!dateString || dateString === "Invalid Date") {
+                      return "Recently";
+                    }
+                    const date = new Date(dateString);
+                    if (isNaN(date.getTime())) {
+                      return "Recently";
+                    }
+                    return formatDistanceToNow(date, { addSuffix: true });
+                  } catch {
+                    return "Recently";
+                  }
+                })()}
+              </span>
+            </div>
 
             {/* Author Reply */}
             {testimonial.reply && (
